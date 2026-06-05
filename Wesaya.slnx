@@ -1,0 +1,35 @@
+﻿<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Wesaya.Application.Contracts/Wesaya.Application.Contracts.csproj" />
+    <Project Path="src/Wesaya.Application/Wesaya.Application.csproj" />
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    <Project Path="src/Wesaya.DbMigrator/Wesaya.DbMigrator.csproj" />
+    <Project Path="src/Wesaya.Domain.Shared/Wesaya.Domain.Shared.csproj" />
+    <Project Path="src/Wesaya.Domain/Wesaya.Domain.csproj" />
+    <Project Path="src/Wesaya.EntityFrameworkCore/Wesaya.EntityFrameworkCore.csproj" />
+    <Project Path="src/Wesaya.HttpApi.Client/Wesaya.HttpApi.Client.csproj" />
+    
+    <Project Path="src/Wesaya.HttpApi.Host/Wesaya.HttpApi.Host.csproj" />
+    <Project Path="src/Wesaya.HttpApi/Wesaya.HttpApi.csproj" />
+    
+    
+    
+  </Folder>
+  <Folder Name="/test/">
+    <Project Path="test/Wesaya.Application.Tests/Wesaya.Application.Tests.csproj" />
+    <Project Path="test/Wesaya.Domain.Tests/Wesaya.Domain.Tests.csproj" />
+    <Project Path="test/Wesaya.EntityFrameworkCore.Tests/Wesaya.EntityFrameworkCore.Tests.csproj" />
+    <Project Path="test/Wesaya.HttpApi.Client.ConsoleTestApp/Wesaya.HttpApi.Client.ConsoleTestApp.csproj" />
+    
+    <Project Path="test/Wesaya.TestBase/Wesaya.TestBase.csproj" />
+    
+  </Folder>
+</Solution>

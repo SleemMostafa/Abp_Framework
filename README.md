@@ -1,4 +1,4 @@
-# MyCompany.MyProject
+﻿# Wesaya
 
 ## About this solution
 
@@ -14,7 +14,7 @@ This is a layered startup solution based on [Domain Driven Design (DDD)](https:/
 
 The solution comes with a default configuration that works out of the box. However, you may consider to change the following configuration before running your solution:
 
-* Check the `ConnectionStrings` in `appsettings.json` files under the `MyCompany.MyProject.AuthServer`, `MyCompany.MyProject.HttpApi.Host` and `MyCompany.MyProject.DbMigrator` projects and change it if you need.
+* Check the `ConnectionStrings` in `appsettings.json` files under the `Wesaya.AuthServer`, `Wesaya.HttpApi.Host` and `Wesaya.DbMigrator` projects and change it if you need.
 
 ### Before running the application
 
@@ -48,15 +48,15 @@ abp install-libs
 
 #### Create the Database
 
-Run `MyCompany.MyProject.DbMigrator` to create the initial database. This should be done in the first run. It is also needed if a new database migration is added to the solution later.
+Run `Wesaya.DbMigrator` to create the initial database. This should be done in the first run. It is also needed if a new database migration is added to the solution later.
 
 ### Solution structure
 
 This is a layered monolith application that consists of the following applications:
 
-* `MyCompany.MyProject.DbMigrator`: A console application which applies the migrations and also seeds the initial data. It is useful on development as well as on production environment.
-* `MyCompany.MyProject.AuthServer`: ASP.NET Core MVC / Razor Pages application that is integrated OAuth 2.0(`OpenIddict`) and account modules. It is used to authenticate users and issue tokens.
-* `MyCompany.MyProject.HttpApi.Host`: ASP.NET Core API application that is used to expose the APIs to the clients.
+* `Wesaya.DbMigrator`: A console application which applies the migrations and also seeds the initial data. It is useful on development as well as on production environment.
+* `Wesaya.AuthServer`: ASP.NET Core MVC / Razor Pages application that is integrated OAuth 2.0(`OpenIddict`) and account modules. It is used to authenticate users and issue tokens.
+* `Wesaya.HttpApi.Host`: ASP.NET Core API application that is used to expose the APIs to the clients.
 * `angular`: Angular application.
 
 ### Deploying the application
