@@ -1,4 +1,6 @@
-﻿using System;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using Volo.Abp;
 using Volo.Abp.Domain.Entities.Auditing;
 
@@ -17,6 +19,10 @@ public class MenuItem : FullAuditedAggregateRoot<Guid>
     public bool IsAvailable { get; private set; }
 
     public int PreparationTimeMinutes { get; private set; }
+
+    private readonly List<ExtraItem> _extraItems = [];
+
+    public IReadOnlyCollection<ExtraItem> ExtraItems => _extraItems;
 
     private MenuItem()
     {
@@ -123,6 +129,39 @@ public class MenuItem : FullAuditedAggregateRoot<Guid>
         }
 
         PreparationTimeMinutes = preparationTimeMinutes;
+    }
+
+    public void AddExtraItem(string name, decimal price)
+    {
+        var extraItem = ExtraItem.Create(name, price);
+
+        if (_extraItems.Any(item => item.Name == extraItem.Name))
+        {
+            throw new BusinessException("Wesaya:ExtraItemAlreadyExists");
+        }
+
+        _extraItems.Add(extraItem);
+    }
+
+    public void RemoveExtraItem(string name)
+    {
+        name = Check.NotNullOrWhiteSpace(
+            name,
+            nameof(name),
+            MenuConsts.MaxExtraItemNameLength);
+
+        var extraItem = _extraItems.FirstOrDefault(item => item.Name == name);
+        if (extraItem == null)
+        {
+            throw new BusinessException("Wesaya:ExtraItemNotFound");
+        }
+
+        _extraItems.Remove(extraItem);
+    }
+
+    public void ClearExtraItems()
+    {
+        _extraItems.Clear();
     }
 
     public void MarkAsAvailable()

@@ -1,0 +1,35 @@
+using System;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+using MediatR;
+using Volo.Abp.Application.Dtos;
+using Volo.Abp.Domain.Repositories;
+
+namespace Wesaya.Menu.Items.Queries;
+
+public record GetMenuItemListQuery(PagedAndSortedResultRequestDto Input)
+    : IRequest<PagedResultDto<MenuItemDto>>;
+
+public class GetMenuItemListQueryHandler(IRepository<MenuItem, Guid> menuItemRepository)
+    : IRequestHandler<GetMenuItemListQuery, PagedResultDto<MenuItemDto>>
+{
+    public async Task<PagedResultDto<MenuItemDto>> Handle(
+        GetMenuItemListQuery request,
+        CancellationToken cancellationToken)
+    {
+        var input = request.Input;
+        var queryable = await menuItemRepository.GetQueryableAsync();
+
+        var totalCount = queryable.Count();
+        var items = queryable
+            .OrderBy(x => x.Name)
+            .Skip(input.SkipCount)
+            .Take(input.MaxResultCount)
+            .ToList();
+
+        return new PagedResultDto<MenuItemDto>(
+            totalCount,
+            items.Select(MenuItemDtoMapper.ToDto).ToList());
+    }
+}

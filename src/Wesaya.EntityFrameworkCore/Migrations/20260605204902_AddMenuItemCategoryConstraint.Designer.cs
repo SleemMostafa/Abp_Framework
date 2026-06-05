@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Volo.Abp.EntityFrameworkCore;
 using Wesaya.EntityFrameworkCore;
@@ -12,9 +13,11 @@ using Wesaya.EntityFrameworkCore;
 namespace Wesaya.Migrations
 {
     [DbContext(typeof(WesayaDbContext))]
-    partial class WesayaDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260605204902_AddMenuItemCategoryConstraint")]
+    partial class AddMenuItemCategoryConstraint
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -2258,38 +2261,6 @@ namespace Wesaya.Migrations
                         .HasForeignKey("CategoryId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
-
-                    b.OwnsMany("Wesaya.Menu.ExtraItem", "ExtraItems", b1 =>
-                        {
-                            b1.Property<Guid>("MenuItemId")
-                                .HasColumnType("uniqueidentifier");
-
-                            b1.Property<int>("Id")
-                                .ValueGeneratedOnAdd()
-                                .HasColumnType("int");
-
-                            SqlServerPropertyBuilderExtensions.UseIdentityColumn(b1.Property<int>("Id"));
-
-                            b1.Property<string>("Name")
-                                .IsRequired()
-                                .HasMaxLength(64)
-                                .HasColumnType("nvarchar(64)");
-
-                            b1.Property<decimal>("Price")
-                                .HasColumnType("decimal(18,2)");
-
-                            b1.HasKey("MenuItemId", "Id");
-
-                            b1.HasIndex("MenuItemId", "Name")
-                                .IsUnique();
-
-                            b1.ToTable("AppMenuItemExtraItems", (string)null);
-
-                            b1.WithOwner()
-                                .HasForeignKey("MenuItemId");
-                        });
-
-                    b.Navigation("ExtraItems");
                 });
 
             modelBuilder.Entity("Volo.Abp.AuditLogging.AuditLog", b =>

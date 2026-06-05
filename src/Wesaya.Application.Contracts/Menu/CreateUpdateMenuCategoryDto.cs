@@ -2,9 +2,9 @@
 
 public sealed class CreateUpdateMenuCategoryDto
 {
-    public string Name { get; set; } = string.Empty;
+    public required string Name { get; init; } 
 
-    public int DisplayOrder { get; set; }
+    public required int DisplayOrder { get; init; }
 
-    public bool IsActive { get; set; } = true;
+    public required bool IsActive { get; init; } = true;
 }

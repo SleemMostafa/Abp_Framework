@@ -1,4 +1,5 @@
-﻿using System.IO;
+using System;
+using System.IO;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -32,6 +33,14 @@ class Program
 
     public static IHostBuilder CreateHostBuilder(string[] args) =>
         Host.CreateDefaultBuilder(args)
+            .ConfigureAppConfiguration((context, configuration) =>
+            {
+                configuration.SetBasePath(AppContext.BaseDirectory);
+                configuration.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
+                configuration.AddJsonFile("appsettings.secrets.json", optional: true, reloadOnChange: true);
+                configuration.AddEnvironmentVariables();
+                configuration.AddCommandLine(args);
+            })
             .AddAppSettingsSecretsJson()
             .ConfigureLogging((context, logging) => logging.ClearProviders())
             .ConfigureServices((hostContext, services) =>

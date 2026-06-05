@@ -5,7 +5,6 @@ using Volo.Abp.BackgroundJobs.EntityFrameworkCore;
 using Volo.Abp.Data;
 using Volo.Abp.DependencyInjection;
 using Volo.Abp.EntityFrameworkCore;
-using Volo.Abp.EntityFrameworkCore.Modeling;
 using Volo.Abp.FeatureManagement.EntityFrameworkCore;
 using Volo.Abp.Identity;
 using Volo.Abp.Identity.EntityFrameworkCore;
@@ -75,24 +74,6 @@ public class WesayaDbContext(DbContextOptions<WesayaDbContext> options) :
 
         /* Configure your own tables/entities inside here */
 
-        builder.Entity<MenuCategory>(b =>
-        {
-            b.ToTable(WesayaConsts.DbTablePrefix + "MenuCategories", WesayaConsts.DbSchema);
-            b.ConfigureByConvention();
-            b.Property(x => x.Name).IsRequired().HasMaxLength(MenuConsts.MaxCategoryNameLength);
-            b.HasIndex(x => x.Name);
-            b.HasIndex(x => x.DisplayOrder);
-        });
-
-        builder.Entity<MenuItem>(b =>
-        {
-            b.ToTable(WesayaConsts.DbTablePrefix + "MenuItems", WesayaConsts.DbSchema);
-            b.ConfigureByConvention();
-            b.Property(x => x.Name).IsRequired().HasMaxLength(MenuConsts.MaxItemNameLength);
-            b.Property(x => x.Description).HasMaxLength(MenuConsts.MaxItemDescriptionLength);
-            b.Property(x => x.Price).HasColumnType("decimal(18,2)");
-            b.HasIndex(x => x.CategoryId);
-            b.HasIndex(x => x.Name);
-        });
+        builder.ApplyConfigurationsFromAssembly(typeof(WesayaDbContext).Assembly);
     }
 }

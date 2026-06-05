@@ -5,9 +5,9 @@ namespace Wesaya.Menu;
 
 public class MenuCategoryDto : AuditedEntityDto<Guid>
 {
-    public string Name { get; set; } = string.Empty;
+    public required string Name { get; init; }
 
-    public int DisplayOrder { get; set; }
+    public required int DisplayOrder { get; init; }
 
-    public bool IsActive { get; set; }
+    public required bool IsActive { get; init; }
 }

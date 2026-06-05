@@ -38,7 +38,6 @@ public class WesayaDomainModule : AbpModule
         {
             options.Languages.Add(new LanguageInfo("ar", "ar", "العربية"));
             options.Languages.Add(new LanguageInfo("en", "en", "English"));
-            options.Languages.Add(new LanguageInfo("en-GB", "en-GB", "English (UK)"));
         });
 
         Configure<AbpMultiTenancyOptions>(options => { options.IsEnabled = MultiTenancyConsts.IsEnabled; });
