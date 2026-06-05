@@ -20,8 +20,8 @@ namespace MyCompany.MyProject.EntityFrameworkCore;
 [ReplaceDbContext(typeof(IIdentityDbContext))]
 [ReplaceDbContext(typeof(ITenantManagementDbContext))]
 [ConnectionStringName("Default")]
-public class MyProjectDbContext :
-    AbpDbContext<MyProjectDbContext>,
+public class MyProjectDbContext(DbContextOptions<MyProjectDbContext> options) :
+    AbpDbContext<MyProjectDbContext>(options),
     IIdentityDbContext,
     ITenantManagementDbContext
 {
@@ -58,12 +58,6 @@ public class MyProjectDbContext :
 
     #endregion
 
-    public MyProjectDbContext(DbContextOptions<MyProjectDbContext> options)
-        : base(options)
-    {
-
-    }
-
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);
@@ -86,8 +80,8 @@ public class MyProjectDbContext :
             b.ToTable(MyProjectConsts.DbTablePrefix + "MenuCategories", MyProjectConsts.DbSchema);
             b.ConfigureByConvention();
             b.Property(x => x.Name).IsRequired().HasMaxLength(MenuConsts.MaxCategoryNameLength);
-            b.HasIndex(x => new { x.TenantId, x.Name });
-            b.HasIndex(x => new { x.TenantId, x.ParentId, x.DisplayOrder });
+            b.HasIndex(x => x.Name);
+            b.HasIndex(x => x.DisplayOrder);
         });
 
         builder.Entity<MenuItem>(b =>
@@ -97,8 +91,8 @@ public class MyProjectDbContext :
             b.Property(x => x.Name).IsRequired().HasMaxLength(MenuConsts.MaxItemNameLength);
             b.Property(x => x.Description).HasMaxLength(MenuConsts.MaxItemDescriptionLength);
             b.Property(x => x.Price).HasColumnType("decimal(18,2)");
-            b.HasIndex(x => new { x.TenantId, x.CategoryId });
-            b.HasIndex(x => new { x.TenantId, x.Name });
+            b.HasIndex(x => x.CategoryId);
+            b.HasIndex(x => x.Name);
         });
     }
 }

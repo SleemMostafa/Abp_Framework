@@ -1,14 +1,11 @@
 using System;
 using Volo.Abp;
 using Volo.Abp.Domain.Entities.Auditing;
-using Volo.Abp.MultiTenancy;
 
 namespace MyCompany.MyProject.Menu;
 
-public class MenuItem : FullAuditedAggregateRoot<Guid>, IMultiTenant
+public class MenuItem : FullAuditedAggregateRoot<Guid>
 {
-    public Guid? TenantId { get; private set; }
-
     public Guid CategoryId { get; private set; }
 
     public string Name { get; private set; } = string.Empty;
@@ -26,23 +23,65 @@ public class MenuItem : FullAuditedAggregateRoot<Guid>, IMultiTenant
         Name = string.Empty;
     }
 
-    public MenuItem(
+    private MenuItem(
         Guid id,
         Guid categoryId,
         string name,
         decimal price,
-        Guid? tenantId = null,
-        string? description = null,
-        int preparationTimeMinutes = 0)
+        string? description,
+        int preparationTimeMinutes,
+        bool isAvailable)
         : base(id)
     {
-        TenantId = tenantId;
         CategoryId = categoryId;
-        IsAvailable = true;
+        IsAvailable = isAvailable;
         SetName(name);
         SetDescription(description);
         SetPrice(price);
         SetPreparationTime(preparationTimeMinutes);
+    }
+
+    public static MenuItem Create(
+        Guid id,
+        Guid categoryId,
+        string name,
+        decimal price,
+        string? description = null,
+        int preparationTimeMinutes = 0,
+        bool isAvailable = true)
+    {
+        return new MenuItem(
+            id,
+            categoryId,
+            name,
+            price,
+            description,
+            preparationTimeMinutes,
+            isAvailable);
+    }
+
+    public void Update(
+        Guid categoryId,
+        string name,
+        decimal price,
+        string? description,
+        int preparationTimeMinutes,
+        bool isAvailable)
+    {
+        MoveToCategory(categoryId);
+        SetName(name);
+        SetDescription(description);
+        SetPrice(price);
+        SetPreparationTime(preparationTimeMinutes);
+
+        if (isAvailable)
+        {
+            MarkAsAvailable();
+        }
+        else
+        {
+            MarkAsUnavailable();
+        }
     }
 
     public void MoveToCategory(Guid categoryId)

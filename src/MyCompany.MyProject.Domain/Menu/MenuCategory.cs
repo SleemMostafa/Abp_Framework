@@ -1,40 +1,63 @@
 using System;
 using Volo.Abp;
 using Volo.Abp.Domain.Entities.Auditing;
-using Volo.Abp.MultiTenancy;
 
 namespace MyCompany.MyProject.Menu;
 
-public class MenuCategory : FullAuditedAggregateRoot<Guid>, IMultiTenant
+public class MenuCategory : FullAuditedAggregateRoot<Guid>
 {
-    public Guid? TenantId { get; private set; }
-
     public string Name { get; private set; } = string.Empty;
 
     public int DisplayOrder { get; private set; }
 
     public bool IsActive { get; private set; }
 
-    public Guid? ParentId { get; private set; }
-
     private MenuCategory()
     {
         Name = string.Empty;
     }
 
-    public MenuCategory(
+    private MenuCategory(
         Guid id,
         string name,
-        Guid? tenantId = null,
-        Guid? parentId = null,
-        int displayOrder = 0)
+        int displayOrder,
+        bool isActive)
         : base(id)
     {
-        TenantId = tenantId;
-        ParentId = parentId;
         DisplayOrder = displayOrder;
-        IsActive = true;
+        IsActive = isActive;
         SetName(name);
+    }
+
+    public static MenuCategory Create(
+        Guid id,
+        string name,
+        int displayOrder = 0,
+        bool isActive = true)
+    {
+        return new MenuCategory(
+            id,
+            name,
+            displayOrder,
+            isActive);
+    }
+
+    public void Update(
+        string name,
+        int displayOrder,
+        bool isActive)
+    {
+        SetName(name);
+        SetDisplayOrder(displayOrder);
+
+        if (isActive)
+        {
+            Activate();
+        }
+        else
+        {
+            Deactivate();
+        }
     }
 
     public void SetName(string name)
