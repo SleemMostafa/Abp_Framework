@@ -1,12 +1,18 @@
-﻿{
-    "culture":  "ar",
-    "texts":  {
-                  "AppName":  "Wesaya",
-                  "Menu:Home":  "Ø§Ù„ØµÙØ­Ø© Ø§Ù„Ø±Ø¦ÙŠØ³ÙŠØ©",
-                  "Welcome":  "Ù…Ø±Ø­Ø¨Ø§Ù‹",
-                  "LongWelcomeMessage":  "Ù…Ø±Ø­Ø¨Ø§ Ø¨ÙƒÙ… ÙÙŠ Ø§Ù„ØªØ·Ø¨ÙŠÙ‚. Ù‡Ø°Ø§ Ù…Ø´Ø±ÙˆØ¹ Ø¨Ø¯Ø¡ ØªØ´ØºÙŠÙ„ ÙŠØ¹ØªÙ…Ø¯ Ø¹Ù„Ù‰ Ø¥Ø·Ø§Ø± Ø¹Ù…Ù„ ABP. Ù„Ù…Ø²ÙŠØ¯ Ù…Ù† Ø§Ù„Ù…Ø¹Ù„ÙˆÙ…Ø§Øª ØŒ ÙŠØ±Ø¬Ù‰ Ø²ÙŠØ§Ø±Ø© abp.io.",
-                  "MenuCategory:NameRequired":  "اسم التصنيف مطلوب.",
-                  "MenuCategory:NameMaxLength":  "اسم التصنيف يجب ألا يزيد عن {0} حرف.",
-                  "MenuCategory:DisplayOrderMustBePositive":  "ترتيب العرض يجب أن يكون صفر أو أكبر."
-              }
+{
+  "culture": "ar",
+  "texts": {
+    "AppName": "Wesaya",
+    "Menu:Home": "الرئيسية",
+    "Welcome": "مرحباً",
+    "LongWelcomeMessage": "مرحباً بك في التطبيق. هذا مشروع بداية يعتمد على إطار عمل ABP.",
+    "MenuCategory:NameRequired": "اسم التصنيف مطلوب.",
+    "MenuCategory:NameMaxLength": "اسم التصنيف يجب ألا يزيد عن {0} حرف.",
+    "MenuCategory:DisplayOrderMustBePositive": "ترتيب العرض يجب أن يكون صفراً أو أكبر.",
+    "Wesaya:MenuItemPriceCannotBeNegative": "سعر عنصر القائمة لا يمكن أن يكون أقل من صفر.",
+    "Wesaya:PreparationTimeCannotBeNegative": "وقت التحضير لا يمكن أن يكون أقل من صفر.",
+    "Wesaya:ExtraItemAlreadyExists": "هذا العنصر الإضافي موجود بالفعل.",
+    "Wesaya:ExtraItemNotFound": "هذا العنصر الإضافي غير موجود.",
+    "Wesaya:ExtraItemPriceCannotBeNegative": "سعر العنصر الإضافي لا يمكن أن يكون أقل من صفر.",
+    "Wesaya:MenuCategoryNotFound": "تصنيف القائمة غير موجود."
+  }
 }

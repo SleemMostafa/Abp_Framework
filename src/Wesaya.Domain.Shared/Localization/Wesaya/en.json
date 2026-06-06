@@ -1,12 +1,18 @@
-﻿{
-    "culture":  "en",
-    "texts":  {
-                  "AppName":  "Wesaya",
-                  "Menu:Home":  "Home",
-                  "Welcome":  "Welcome",
-                  "LongWelcomeMessage":  "Welcome to the application. This is a startup project based on the ABP framework. For more information, visit abp.io.",
-                  "MenuCategory:NameRequired":  "Category name is required.",
-                  "MenuCategory:NameMaxLength":  "Category name must be at most {0} characters.",
-                  "MenuCategory:DisplayOrderMustBePositive":  "Display order must be zero or greater."
-              }
+{
+  "culture": "en",
+  "texts": {
+    "AppName": "Wesaya",
+    "Menu:Home": "Home",
+    "Welcome": "Welcome",
+    "LongWelcomeMessage": "Welcome to the application. This is a startup project based on the ABP framework. For more information, visit abp.io.",
+    "MenuCategory:NameRequired": "Category name is required.",
+    "MenuCategory:NameMaxLength": "Category name must be at most {0} characters.",
+    "MenuCategory:DisplayOrderMustBePositive": "Display order must be zero or greater.",
+    "Wesaya:MenuItemPriceCannotBeNegative": "Menu item price cannot be negative.",
+    "Wesaya:PreparationTimeCannotBeNegative": "Preparation time cannot be negative.",
+    "Wesaya:ExtraItemAlreadyExists": "This extra item already exists.",
+    "Wesaya:ExtraItemNotFound": "This extra item was not found.",
+    "Wesaya:ExtraItemPriceCannotBeNegative": "Extra item price cannot be negative.",
+    "Wesaya:MenuCategoryNotFound": "Menu category was not found."
+  }
 }

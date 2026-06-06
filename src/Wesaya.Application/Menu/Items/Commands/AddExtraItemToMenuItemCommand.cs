@@ -4,7 +4,8 @@ using System.Threading.Tasks;
 using MediatR;
 using Volo.Abp;
 using Volo.Abp.Domain.Repositories;
-using Wesaya.Menu.Dtos;
+using Wesaya.Menu.Items;
+using Wesaya.Menu.Exceptions;
 
 namespace Wesaya.Menu.Items.Commands;
 
@@ -43,7 +44,7 @@ public class AddExtraItemToMenuItemCommandHandler(IRepository<MenuItem, Guid> me
 
         if (request.Input.Price < 0)
         {
-            throw new BusinessException("Wesaya:ExtraItemPriceCannotBeNegative");
+            throw new ExtraItemPriceCannotBeNegativeException();
         }
     }
 }

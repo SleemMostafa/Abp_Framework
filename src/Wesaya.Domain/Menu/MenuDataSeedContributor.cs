@@ -11,6 +11,7 @@ using Volo.Abp.Domain.Repositories;
 using Volo.Abp.Guids;
 using Volo.Abp.Uow;
 using Wesaya.Localization;
+using Wesaya.Menu.Exceptions;
 
 namespace Wesaya.Menu;
 
@@ -190,9 +191,7 @@ public class MenuDataSeedContributor(
 
         if (category == null)
         {
-            throw new BusinessException(
-                "Wesaya:MenuCategoryNotFound",
-                $"Menu category '{englishName}' was not found during data seeding.");
+            throw new MenuCategoryNotFoundException(englishName);
         }
 
         return category.Id;

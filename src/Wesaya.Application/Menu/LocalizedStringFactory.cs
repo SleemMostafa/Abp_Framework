@@ -1,5 +1,5 @@
 using Wesaya.Localization;
-using Wesaya.Menu.Dtos;
+using Wesaya.Menu.Shared;
 
 namespace Wesaya.Menu;
 

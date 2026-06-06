@@ -4,6 +4,7 @@ using System.Linq;
 using Volo.Abp;
 using Volo.Abp.Domain.Entities.Auditing;
 using Wesaya.Localization;
+using Wesaya.Menu.Exceptions;
 
 namespace Wesaya.Menu;
 
@@ -109,7 +110,7 @@ public class MenuItem : FullAuditedAggregateRoot<Guid>
     {
         if (price < 0)
         {
-            throw new BusinessException("Wesaya:MenuItemPriceCannotBeNegative");
+            throw new MenuItemPriceCannotBeNegativeException();
         }
 
         Price = price;
@@ -119,7 +120,7 @@ public class MenuItem : FullAuditedAggregateRoot<Guid>
     {
         if (preparationTimeMinutes < 0)
         {
-            throw new BusinessException("Wesaya:PreparationTimeCannotBeNegative");
+            throw new PreparationTimeCannotBeNegativeException();
         }
 
         PreparationTimeMinutes = preparationTimeMinutes;
@@ -131,7 +132,7 @@ public class MenuItem : FullAuditedAggregateRoot<Guid>
 
         if (_extraItems.Any(item => item.Name.English == extraItem.Name.English || item.Name.Arabic == extraItem.Name.Arabic))
         {
-            throw new BusinessException("Wesaya:ExtraItemAlreadyExists");
+            throw new ExtraItemAlreadyExistsException();
         }
 
         _extraItems.Add(extraItem);
@@ -147,7 +148,7 @@ public class MenuItem : FullAuditedAggregateRoot<Guid>
         var extraItem = _extraItems.FirstOrDefault(item => item.Name.English == name || item.Name.Arabic == name);
         if (extraItem == null)
         {
-            throw new BusinessException("Wesaya:ExtraItemNotFound");
+            throw new ExtraItemNotFoundException();
         }
 
         _extraItems.Remove(extraItem);

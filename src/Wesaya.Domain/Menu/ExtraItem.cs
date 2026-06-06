@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using Volo.Abp;
 using Volo.Abp.Domain.Values;
 using Wesaya.Localization;
+using Wesaya.Menu.Exceptions;
 
 namespace Wesaya.Menu;
 
@@ -30,7 +31,7 @@ public class ExtraItem : ValueObject
     {
         if (price < 0)
         {
-            throw new BusinessException("Wesaya:ExtraItemPriceCannotBeNegative");
+            throw new ExtraItemPriceCannotBeNegativeException();
         }
 
         Price = price;

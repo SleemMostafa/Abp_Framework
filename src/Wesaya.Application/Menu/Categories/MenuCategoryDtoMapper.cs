@@ -1,4 +1,4 @@
-﻿using Wesaya.Menu.Dtos;
+using Wesaya.Menu.Categories;
 
 namespace Wesaya.Menu.Categories;
 

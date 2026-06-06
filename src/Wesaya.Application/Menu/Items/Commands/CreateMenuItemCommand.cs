@@ -5,7 +5,8 @@ using MediatR;
 using Volo.Abp;
 using Volo.Abp.Domain.Repositories;
 using Volo.Abp.Guids;
-using Wesaya.Menu.Dtos;
+using Wesaya.Menu.Items;
+using Wesaya.Menu.Exceptions;
 
 namespace Wesaya.Menu.Items.Commands;
 
@@ -63,12 +64,12 @@ public class CreateMenuItemCommandHandler(
 
         if (input.Price < 0)
         {
-            throw new BusinessException("Wesaya:MenuItemPriceCannotBeNegative");
+            throw new MenuItemPriceCannotBeNegativeException();
         }
 
         if (input.PreparationTimeMinutes < 0)
         {
-            throw new BusinessException("Wesaya:PreparationTimeCannotBeNegative");
+            throw new PreparationTimeCannotBeNegativeException();
         }
     }
 }
