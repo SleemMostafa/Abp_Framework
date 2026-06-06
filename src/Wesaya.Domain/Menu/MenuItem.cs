@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Volo.Abp;
 using Volo.Abp.Domain.Entities.Auditing;
+using Wesaya.Localization;
 
 namespace Wesaya.Menu;
 
@@ -10,9 +11,9 @@ public class MenuItem : FullAuditedAggregateRoot<Guid>
 {
     public Guid CategoryId { get; private set; }
 
-    public string Name { get; private set; } = string.Empty;
+    public StrongLocalizedString Name { get; private set; } = null!;
 
-    public string? Description { get; private set; }
+    public OptionalLocalizedString Description { get; private set; } = OptionalLocalizedString.Empty();
 
     public decimal Price { get; private set; }
 
@@ -26,15 +27,14 @@ public class MenuItem : FullAuditedAggregateRoot<Guid>
 
     private MenuItem()
     {
-        Name = string.Empty;
     }
 
     private MenuItem(
         Guid id,
         Guid categoryId,
-        string name,
+        StrongLocalizedString name,
         decimal price,
-        string? description,
+        OptionalLocalizedString? description,
         int preparationTimeMinutes,
         bool isAvailable)
         : base(id)
@@ -50,9 +50,9 @@ public class MenuItem : FullAuditedAggregateRoot<Guid>
     public static MenuItem Create(
         Guid id,
         Guid categoryId,
-        string name,
+        StrongLocalizedString name,
         decimal price,
-        string? description = null,
+        OptionalLocalizedString? description = null,
         int preparationTimeMinutes = 0,
         bool isAvailable = true)
     {
@@ -68,9 +68,9 @@ public class MenuItem : FullAuditedAggregateRoot<Guid>
 
     public void Update(
         Guid categoryId,
-        string name,
+        StrongLocalizedString name,
         decimal price,
-        string? description,
+        OptionalLocalizedString? description,
         int preparationTimeMinutes,
         bool isAvailable)
     {
@@ -95,20 +95,14 @@ public class MenuItem : FullAuditedAggregateRoot<Guid>
         CategoryId = categoryId;
     }
 
-    public void SetName(string name)
+    public void SetName(StrongLocalizedString name)
     {
-        Name = Check.NotNullOrWhiteSpace(
-            name,
-            nameof(name),
-            MenuConsts.MaxItemNameLength);
+        Name = name;
     }
 
-    public void SetDescription(string? description)
+    public void SetDescription(OptionalLocalizedString? description)
     {
-        Description = Check.Length(
-            description,
-            nameof(description),
-            MenuConsts.MaxItemDescriptionLength);
+        Description = description ?? OptionalLocalizedString.Empty();
     }
 
     public void SetPrice(decimal price)
@@ -131,11 +125,11 @@ public class MenuItem : FullAuditedAggregateRoot<Guid>
         PreparationTimeMinutes = preparationTimeMinutes;
     }
 
-    public void AddExtraItem(string name, decimal price)
+    public void AddExtraItem(StrongLocalizedString name, decimal price)
     {
         var extraItem = ExtraItem.Create(name, price);
 
-        if (_extraItems.Any(item => item.Name == extraItem.Name))
+        if (_extraItems.Any(item => item.Name.English == extraItem.Name.English || item.Name.Arabic == extraItem.Name.Arabic))
         {
             throw new BusinessException("Wesaya:ExtraItemAlreadyExists");
         }
@@ -150,7 +144,7 @@ public class MenuItem : FullAuditedAggregateRoot<Guid>
             nameof(name),
             MenuConsts.MaxExtraItemNameLength);
 
-        var extraItem = _extraItems.FirstOrDefault(item => item.Name == name);
+        var extraItem = _extraItems.FirstOrDefault(item => item.Name.English == name || item.Name.Arabic == name);
         if (extraItem == null)
         {
             throw new BusinessException("Wesaya:ExtraItemNotFound");

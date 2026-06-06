@@ -1,8 +1,8 @@
-﻿namespace Wesaya.Menu;
+namespace Wesaya.Menu.Dtos;
 
 public sealed class CreateUpdateMenuCategoryDto
 {
-    public required string Name { get; init; } 
+    public required StrongLocalizedStringInputDto Name { get; init; }
 
     public required int DisplayOrder { get; init; }
 

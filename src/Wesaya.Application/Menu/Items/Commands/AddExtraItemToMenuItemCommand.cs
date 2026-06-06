@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using MediatR;
 using Volo.Abp;
 using Volo.Abp.Domain.Repositories;
+using Wesaya.Menu.Dtos;
 
 namespace Wesaya.Menu.Items.Commands;
 
@@ -23,7 +24,11 @@ public class AddExtraItemToMenuItemCommandHandler(IRepository<MenuItem, Guid> me
             request.Id,
             cancellationToken: cancellationToken);
 
-        item.AddExtraItem(request.Input.Name, request.Input.Price);
+        item.AddExtraItem(
+            LocalizedStringFactory.CreateStrong(
+                request.Input.Name,
+                MenuConsts.MaxExtraItemNameLength),
+            request.Input.Price);
 
         await menuItemRepository.UpdateAsync(item, cancellationToken: cancellationToken);
 
@@ -34,7 +39,7 @@ public class AddExtraItemToMenuItemCommandHandler(IRepository<MenuItem, Guid> me
     {
         Check.NotDefaultOrNull<Guid>(request.Id, nameof(request.Id));
         Check.NotNull(request.Input, nameof(request.Input));
-        Check.NotNullOrWhiteSpace(request.Input.Name, nameof(request.Input.Name), MenuConsts.MaxExtraItemNameLength);
+        Check.NotNull(request.Input.Name, nameof(request.Input.Name));
 
         if (request.Input.Price < 0)
         {

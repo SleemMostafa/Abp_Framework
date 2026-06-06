@@ -2,8 +2,9 @@ using System;
 using System.Threading.Tasks;
 using Volo.Abp.Application.Dtos;
 using Volo.Abp.Application.Services;
+using Wesaya.Menu.Dtos;
 
-namespace Wesaya.Menu;
+namespace Wesaya.Menu.Services;
 
 public interface IMenuCategoryAppService : IApplicationService
 {

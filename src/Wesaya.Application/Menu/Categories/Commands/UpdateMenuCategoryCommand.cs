@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using MediatR;
 using Volo.Abp;
 using Volo.Abp.Domain.Repositories;
+using Wesaya.Menu.Dtos;
 
 namespace Wesaya.Menu.Categories.Commands;
 
@@ -24,7 +25,9 @@ public class UpdateMenuCategoryCommandHandler(IRepository<MenuCategory, Guid> ca
             cancellationToken: cancellationToken);
 
         category.Update(
-            request.Input.Name,
+            LocalizedStringFactory.CreateStrong(
+                request.Input.Name,
+                MenuConsts.MaxCategoryNameLength),
             request.Input.DisplayOrder,
             request.Input.IsActive);
 
@@ -37,9 +40,6 @@ public class UpdateMenuCategoryCommandHandler(IRepository<MenuCategory, Guid> ca
     {
         Check.NotDefaultOrNull<Guid>(request.Id, nameof(request.Id));
         Check.NotNull(request.Input, nameof(request.Input));
-        Check.NotNullOrWhiteSpace(
-            request.Input.Name,
-            nameof(request.Input.Name),
-            MenuConsts.MaxCategoryNameLength);
+        Check.NotNull(request.Input.Name, nameof(request.Input.Name));
     }
 }

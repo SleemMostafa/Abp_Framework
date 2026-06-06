@@ -1,12 +1,12 @@
-﻿using System;
-using Volo.Abp;
+using System;
 using Volo.Abp.Domain.Entities.Auditing;
+using Wesaya.Localization;
 
 namespace Wesaya.Menu;
 
 public class MenuCategory : FullAuditedAggregateRoot<Guid>
 {
-    public string Name { get; private set; } = string.Empty;
+    public StrongLocalizedString Name { get; private set; } = null!;
 
     public int DisplayOrder { get; private set; }
 
@@ -14,12 +14,11 @@ public class MenuCategory : FullAuditedAggregateRoot<Guid>
 
     private MenuCategory()
     {
-        Name = string.Empty;
     }
 
     private MenuCategory(
         Guid id,
-        string name,
+        StrongLocalizedString name,
         int displayOrder,
         bool isActive)
         : base(id)
@@ -31,7 +30,7 @@ public class MenuCategory : FullAuditedAggregateRoot<Guid>
 
     public static MenuCategory Create(
         Guid id,
-        string name,
+        StrongLocalizedString name,
         int displayOrder = 0,
         bool isActive = true)
     {
@@ -43,7 +42,7 @@ public class MenuCategory : FullAuditedAggregateRoot<Guid>
     }
 
     public void Update(
-        string name,
+        StrongLocalizedString name,
         int displayOrder,
         bool isActive)
     {
@@ -60,12 +59,9 @@ public class MenuCategory : FullAuditedAggregateRoot<Guid>
         }
     }
 
-    public void SetName(string name)
+    public void SetName(StrongLocalizedString name)
     {
-        Name = Check.NotNullOrWhiteSpace(
-            name,
-            nameof(name),
-            MenuConsts.MaxCategoryNameLength);
+        Name = name;
     }
 
     public void SetDisplayOrder(int displayOrder)

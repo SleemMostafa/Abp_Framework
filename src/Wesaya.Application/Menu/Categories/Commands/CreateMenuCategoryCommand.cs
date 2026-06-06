@@ -5,6 +5,7 @@ using MediatR;
 using Volo.Abp;
 using Volo.Abp.Domain.Repositories;
 using Volo.Abp.Guids;
+using Wesaya.Menu.Dtos;
 
 namespace Wesaya.Menu.Categories.Commands;
 
@@ -24,7 +25,9 @@ public class CreateMenuCategoryCommandHandler(
 
         var category = MenuCategory.Create(
             guidGenerator.Create(),
-            request.Input.Name,
+            LocalizedStringFactory.CreateStrong(
+                request.Input.Name,
+                MenuConsts.MaxCategoryNameLength),
             request.Input.DisplayOrder,
             request.Input.IsActive);
 
@@ -36,9 +39,6 @@ public class CreateMenuCategoryCommandHandler(
     private static void Validate(CreateUpdateMenuCategoryDto input)
     {
         Check.NotNull(input, nameof(input));
-        Check.NotNullOrWhiteSpace(
-            input.Name,
-            nameof(input.Name),
-            MenuConsts.MaxCategoryNameLength);
+        Check.NotNull(input.Name, nameof(input.Name));
     }
 }

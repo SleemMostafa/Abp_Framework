@@ -1,8 +1,9 @@
 using FluentValidation;
 using Microsoft.Extensions.Localization;
 using Wesaya.Localization;
+using Wesaya.Menu.Dtos;
 
-namespace Wesaya.Menu;
+namespace Wesaya.Menu.Validators;
 
 public class CreateUpdateMenuItemDtoValidator : AbstractValidator<CreateUpdateMenuItemDto>
 {
@@ -12,11 +13,24 @@ public class CreateUpdateMenuItemDtoValidator : AbstractValidator<CreateUpdateMe
             .NotEmpty();
 
         RuleFor(x => x.Name)
+            .NotNull();
+
+        RuleFor(x => x.Name.English)
             .NotEmpty()
             .MaximumLength(MenuConsts.MaxItemNameLength);
 
-        RuleFor(x => x.Description)
-            .MaximumLength(MenuConsts.MaxItemDescriptionLength);
+        RuleFor(x => x.Name.Arabic)
+            .NotEmpty()
+            .MaximumLength(MenuConsts.MaxItemNameLength);
+
+        When(x => x.Description != null, () =>
+        {
+            RuleFor(x => x.Description!.English)
+                .MaximumLength(MenuConsts.MaxItemDescriptionLength);
+
+            RuleFor(x => x.Description!.Arabic)
+                .MaximumLength(MenuConsts.MaxItemDescriptionLength);
+        });
 
         RuleFor(x => x.Price)
             .GreaterThanOrEqualTo(0);

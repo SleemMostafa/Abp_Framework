@@ -1,6 +1,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using Wesaya.Localization;
 using Wesaya.Menu;
 using Volo.Abp.EntityFrameworkCore.Modeling;
 
@@ -17,12 +18,27 @@ public class MenuItemConfiguration : IEntityTypeConfiguration<MenuItem>
         builder.Property(x => x.CategoryId)
             .IsRequired();
 
-        builder.Property(x => x.Name)
-            .IsRequired()
-            .HasMaxLength(MenuConsts.MaxItemNameLength);
+        builder.OwnsOne(x => x.Name, nameBuilder =>
+        {
+            ConfigureStrongLocalizedString(
+                nameBuilder,
+                "Name",
+                MenuConsts.MaxItemNameLength);
 
-        builder.Property(x => x.Description)
-            .HasMaxLength(MenuConsts.MaxItemDescriptionLength);
+            nameBuilder.HasIndex(x => x.English);
+            nameBuilder.HasIndex(x => x.Arabic);
+        });
+
+        builder.OwnsOne(x => x.Description, descriptionBuilder =>
+        {
+            ConfigureOptionalLocalizedString(
+                descriptionBuilder,
+                "Description",
+                MenuConsts.MaxItemDescriptionLength);
+        });
+
+        builder.Navigation(x => x.Description)
+            .IsRequired();
 
         builder.Property(x => x.Price)
             .IsRequired()
@@ -42,9 +58,18 @@ public class MenuItemConfiguration : IEntityTypeConfiguration<MenuItem>
             extraItemBuilder.Property<int>("Id");
             extraItemBuilder.HasKey("MenuItemId", "Id");
 
-            extraItemBuilder.Property(x => x.Name)
-                .IsRequired()
-                .HasMaxLength(MenuConsts.MaxExtraItemNameLength);
+            extraItemBuilder.OwnsOne(x => x.Name, nameBuilder =>
+            {
+                nameBuilder.Property(x => x.English)
+                    .HasColumnName("NameEnglish")
+                    .IsRequired()
+                    .HasMaxLength(MenuConsts.MaxExtraItemNameLength);
+
+                nameBuilder.Property(x => x.Arabic)
+                    .HasColumnName("NameArabic")
+                    .IsRequired()
+                    .HasMaxLength(MenuConsts.MaxExtraItemNameLength);
+            });
 
             extraItemBuilder.Property(x => x.Price)
                 .IsRequired()
@@ -53,8 +78,6 @@ public class MenuItemConfiguration : IEntityTypeConfiguration<MenuItem>
             extraItemBuilder.WithOwner()
                 .HasForeignKey("MenuItemId");
 
-            extraItemBuilder.HasIndex("MenuItemId", nameof(ExtraItem.Name))
-                .IsUnique();
         });
 
         builder.Navigation(x => x.ExtraItems)
@@ -66,6 +89,35 @@ public class MenuItemConfiguration : IEntityTypeConfiguration<MenuItem>
             .OnDelete(DeleteBehavior.Restrict);
 
         builder.HasIndex(x => x.CategoryId);
-        builder.HasIndex(x => x.Name);
+    }
+
+    private static void ConfigureStrongLocalizedString(
+        OwnedNavigationBuilder<MenuItem, StrongLocalizedString> builder,
+        string prefix,
+        int maxLength)
+    {
+        builder.Property(x => x.English)
+            .HasColumnName(prefix + "English")
+            .IsRequired()
+            .HasMaxLength(maxLength);
+
+        builder.Property(x => x.Arabic)
+            .HasColumnName(prefix + "Arabic")
+            .IsRequired()
+            .HasMaxLength(maxLength);
+    }
+
+    private static void ConfigureOptionalLocalizedString(
+        OwnedNavigationBuilder<MenuItem, OptionalLocalizedString> builder,
+        string prefix,
+        int maxLength)
+    {
+        builder.Property(x => x.English)
+            .HasColumnName(prefix + "English")
+            .HasMaxLength(maxLength);
+
+        builder.Property(x => x.Arabic)
+            .HasColumnName(prefix + "Arabic")
+            .HasMaxLength(maxLength);
     }
 }

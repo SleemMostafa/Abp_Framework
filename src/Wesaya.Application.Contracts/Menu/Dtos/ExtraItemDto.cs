@@ -1,6 +1,6 @@
-namespace Wesaya.Menu;
+namespace Wesaya.Menu.Dtos;
 
-public class CreateUpdateExtraItemDto
+public class ExtraItemDto
 {
     public string Name { get; set; } = string.Empty;
 

@@ -1,4 +1,5 @@
 using System.Linq;
+using Wesaya.Menu.Dtos;
 
 namespace Wesaya.Menu.Items;
 
@@ -14,15 +15,15 @@ internal static class MenuItemDtoMapper
             LastModificationTime = item.LastModificationTime,
             LastModifierId = item.LastModifierId,
             CategoryId = item.CategoryId,
-            Name = item.Name,
-            Description = item.Description,
+            Name = item.Name.GetValue(),
+            Description = item.Description.GetValue(),
             Price = item.Price,
             IsAvailable = item.IsAvailable,
             PreparationTimeMinutes = item.PreparationTimeMinutes,
             ExtraItems = item.ExtraItems
                 .Select(extraItem => new ExtraItemDto
                 {
-                    Name = extraItem.Name,
+                    Name = extraItem.Name.GetValue(),
                     Price = extraItem.Price
                 })
                 .ToList()

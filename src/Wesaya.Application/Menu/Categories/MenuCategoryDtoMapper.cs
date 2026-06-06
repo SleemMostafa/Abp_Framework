@@ -1,4 +1,6 @@
-﻿namespace Wesaya.Menu.Categories;
+﻿using Wesaya.Menu.Dtos;
+
+namespace Wesaya.Menu.Categories;
 
 internal static class MenuCategoryDtoMapper
 {
@@ -7,7 +9,7 @@ internal static class MenuCategoryDtoMapper
         return new MenuCategoryDto
         {
             Id = category.Id,
-            Name = category.Name,
+            Name = category.Name.GetValue(),
             DisplayOrder = category.DisplayOrder,
             IsActive = category.IsActive,
             CreationTime = category.CreationTime,

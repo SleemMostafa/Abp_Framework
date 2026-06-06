@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using MediatR;
 using Volo.Abp.Application.Dtos;
 using Volo.Abp.Domain.Repositories;
+using Wesaya.Menu.Dtos;
 
 namespace Wesaya.Menu.Items.Queries;
 
@@ -23,7 +24,7 @@ public class GetMenuItemListQueryHandler(IRepository<MenuItem, Guid> menuItemRep
 
         var totalCount = queryable.Count();
         var items = queryable
-            .OrderBy(x => x.Name)
+            .OrderBy(x => x.Name.English)
             .Skip(input.SkipCount)
             .Take(input.MaxResultCount)
             .ToList();

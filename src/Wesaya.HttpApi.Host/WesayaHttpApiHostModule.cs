@@ -1,9 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Cors;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Localization;
 using Microsoft.AspNetCore.Extensions.DependencyInjection;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -60,6 +64,7 @@ public sealed class WesayaHttpApiHostModule : AbpModule
         var hostingEnvironment = context.Services.GetHostingEnvironment();
 
         ConfigureAuthentication(context);
+        ConfigureRequestLocalization(context);
         ConfigureBundles();
         ConfigureUrls(configuration);
         ConfigureConventionalControllers();
@@ -124,6 +129,47 @@ public sealed class WesayaHttpApiHostModule : AbpModule
                     Path.Combine(hostingEnvironment.ContentRootPath,
                         $"..{Path.DirectorySeparatorChar}Wesaya.Application"));
             });
+        }
+    }
+
+    private void ConfigureRequestLocalization(ServiceConfigurationContext context)
+    {
+        Configure<RequestLocalizationOptions>(options =>
+        {
+            var supportedCultures = new List<CultureInfo>
+            {
+                new("en"),
+                new("ar")
+            };
+
+            options.DefaultRequestCulture = new RequestCulture("en");
+            options.SupportedCultures = supportedCultures;
+            options.SupportedUICultures = supportedCultures;
+            options.RequestCultureProviders.Insert(0, new LanguageHeaderRequestCultureProvider());
+        });
+    }
+
+    private sealed class LanguageHeaderRequestCultureProvider : RequestCultureProvider
+    {
+        public const string HeaderName = "language";
+
+        public override Task<ProviderCultureResult?> DetermineProviderCultureResult(HttpContext httpContext)
+        {
+            if (httpContext.Request.Headers.TryGetValue(HeaderName, out var values))
+            {
+                var cultureValue = values.ToString().Trim().ToLowerInvariant();
+                if (cultureValue.StartsWith("ar", StringComparison.OrdinalIgnoreCase))
+                {
+                    return Task.FromResult<ProviderCultureResult?>(new ProviderCultureResult("ar", "ar"));
+                }
+
+                if (cultureValue.StartsWith("en", StringComparison.OrdinalIgnoreCase))
+                {
+                    return Task.FromResult<ProviderCultureResult?>(new ProviderCultureResult("en", "en"));
+                }
+            }
+
+            return Task.FromResult<ProviderCultureResult?>(null);
         }
     }
 

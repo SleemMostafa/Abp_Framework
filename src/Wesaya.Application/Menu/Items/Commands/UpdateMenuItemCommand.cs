@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using MediatR;
 using Volo.Abp;
 using Volo.Abp.Domain.Repositories;
+using Wesaya.Menu.Dtos;
 
 namespace Wesaya.Menu.Items.Commands;
 
@@ -31,16 +32,24 @@ public class UpdateMenuItemCommandHandler(
 
         item.Update(
             request.Input.CategoryId,
-            request.Input.Name,
+            LocalizedStringFactory.CreateStrong(
+                request.Input.Name,
+                MenuConsts.MaxItemNameLength),
             request.Input.Price,
-            request.Input.Description,
+            LocalizedStringFactory.CreateOptional(
+                request.Input.Description,
+                MenuConsts.MaxItemDescriptionLength),
             request.Input.PreparationTimeMinutes,
             request.Input.IsAvailable);
 
         item.ClearExtraItems();
         foreach (var extraItem in request.Input.ExtraItems)
         {
-            item.AddExtraItem(extraItem.Name, extraItem.Price);
+            item.AddExtraItem(
+                LocalizedStringFactory.CreateStrong(
+                    extraItem.Name,
+                    MenuConsts.MaxExtraItemNameLength),
+                extraItem.Price);
         }
 
         await menuItemRepository.UpdateAsync(item, cancellationToken: cancellationToken);
@@ -53,8 +62,7 @@ public class UpdateMenuItemCommandHandler(
         Check.NotDefaultOrNull<Guid>(request.Id, nameof(request.Id));
         Check.NotNull(request.Input, nameof(request.Input));
         Check.NotDefaultOrNull<Guid>(request.Input.CategoryId, nameof(request.Input.CategoryId));
-        Check.NotNullOrWhiteSpace(request.Input.Name, nameof(request.Input.Name), MenuConsts.MaxItemNameLength);
-        Check.Length(request.Input.Description, nameof(request.Input.Description), MenuConsts.MaxItemDescriptionLength);
+        Check.NotNull(request.Input.Name, nameof(request.Input.Name));
 
         if (request.Input.Price < 0)
         {

@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using MediatR;
 using Volo.Abp;
 using Volo.Abp.Domain.Repositories;
+using Wesaya.Menu.Dtos;
 
 namespace Wesaya.Menu.Categories.Queries;
 

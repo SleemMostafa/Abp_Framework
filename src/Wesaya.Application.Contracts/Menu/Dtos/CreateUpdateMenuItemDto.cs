@@ -1,15 +1,15 @@
 using System;
 using System.Collections.Generic;
 
-namespace Wesaya.Menu;
+namespace Wesaya.Menu.Dtos;
 
 public class CreateUpdateMenuItemDto
 {
     public Guid CategoryId { get; set; }
 
-    public string Name { get; set; } = string.Empty;
+    public StrongLocalizedStringInputDto Name { get; set; } = new();
 
-    public string? Description { get; set; }
+    public OptionalLocalizedStringInputDto? Description { get; set; }
 
     public decimal Price { get; set; }
 

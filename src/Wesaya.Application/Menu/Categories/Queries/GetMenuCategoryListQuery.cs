@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using MediatR;
 using Volo.Abp.Application.Dtos;
 using Volo.Abp.Domain.Repositories;
+using Wesaya.Menu.Dtos;
 
 namespace Wesaya.Menu.Categories.Queries;
 
@@ -24,7 +25,7 @@ public class GetMenuCategoryListQueryHandler(IRepository<MenuCategory, Guid> cat
         var totalCount = queryable.Count();
         var categories = queryable
             .OrderBy(x => x.DisplayOrder)
-            .ThenBy(x => x.Name)
+            .ThenBy(x => x.Name.English)
             .Skip(input.SkipCount)
             .Take(input.MaxResultCount)
             .ToList();
