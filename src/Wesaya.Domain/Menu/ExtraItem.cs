@@ -1,12 +1,11 @@
 using System.Collections.Generic;
-using Volo.Abp;
 using Volo.Abp.Domain.Values;
 using Wesaya.Localization;
 using Wesaya.Menu.Exceptions;
 
 namespace Wesaya.Menu;
 
-public class ExtraItem : ValueObject
+public sealed class ExtraItem : ValueObject
 {
     public StrongLocalizedString Name { get; private set; } = null!;
 

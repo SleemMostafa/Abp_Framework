@@ -1,8 +1,8 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using FluentValidation;
 using MediatR;
-using Volo.Abp;
 using Volo.Abp.Domain.Repositories;
 using Volo.Abp.Guids;
 using Wesaya.Menu.Categories;
@@ -11,6 +11,35 @@ namespace Wesaya.Menu.Categories.Commands;
 
 public record CreateMenuCategoryCommand(CreateUpdateMenuCategoryDto Input)
     : IRequest<MenuCategoryDto>;
+
+public class CreateMenuCategoryCommandValidator : AbstractValidator<CreateMenuCategoryCommand>
+{
+    public CreateMenuCategoryCommandValidator()
+    {
+        RuleFor(x => x.Input)
+            .NotNull();
+
+        When(x => x.Input != null, () =>
+        {
+            RuleFor(x => x.Input.Name)
+                .NotNull();
+
+            When(x => x.Input.Name != null, () =>
+            {
+                RuleFor(x => x.Input.Name.English)
+                    .NotEmpty()
+                    .MaximumLength(MenuConsts.MaxCategoryNameLength);
+
+                RuleFor(x => x.Input.Name.Arabic)
+                    .NotEmpty()
+                    .MaximumLength(MenuConsts.MaxCategoryNameLength);
+            });
+
+            RuleFor(x => x.Input.DisplayOrder)
+                .GreaterThanOrEqualTo(0);
+        });
+    }
+}
 
 public class CreateMenuCategoryCommandHandler(
     IRepository<MenuCategory, Guid> categoryRepository,
@@ -21,8 +50,6 @@ public class CreateMenuCategoryCommandHandler(
         CreateMenuCategoryCommand request,
         CancellationToken cancellationToken)
     {
-        Validate(request.Input);
-
         var category = MenuCategory.Create(
             guidGenerator.Create(),
             LocalizedStringFactory.CreateStrong(
@@ -34,11 +61,5 @@ public class CreateMenuCategoryCommandHandler(
         await categoryRepository.InsertAsync(category, cancellationToken: cancellationToken);
 
         return MenuCategoryDtoMapper.ToDto(category);
-    }
-
-    private static void Validate(CreateUpdateMenuCategoryDto input)
-    {
-        Check.NotNull(input, nameof(input));
-        Check.NotNull(input.Name, nameof(input.Name));
     }
 }

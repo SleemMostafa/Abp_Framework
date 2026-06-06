@@ -148,7 +148,7 @@ public sealed class WesayaHttpApiHostModule : AbpModule
             options.RequestCultureProviders.Insert(0, new LanguageHeaderRequestCultureProvider());
         });
     }
-
+    // to read header language
     private sealed class LanguageHeaderRequestCultureProvider : RequestCultureProvider
     {
         public const string HeaderName = "language";

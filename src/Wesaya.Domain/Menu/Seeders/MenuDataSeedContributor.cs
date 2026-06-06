@@ -5,7 +5,7 @@ using Volo.Abp.Data;
 using Volo.Abp.DependencyInjection;
 using Volo.Abp.Uow;
 
-namespace Wesaya.Menu;
+namespace Wesaya.Menu.Seeders;
 
 public class MenuDataSeedContributor(
     MenuCategoryDataSeeder categoryDataSeeder,

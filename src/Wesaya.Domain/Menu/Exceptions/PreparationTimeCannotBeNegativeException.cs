@@ -2,5 +2,5 @@ using Volo.Abp;
 
 namespace Wesaya.Menu.Exceptions;
 
-public class PreparationTimeCannotBeNegativeException()
+public sealed class PreparationTimeCannotBeNegativeException()
     : BusinessException(WesayaErrorCodes.PreparationTimeCannotBeNegative);

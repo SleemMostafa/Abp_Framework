@@ -1,8 +1,8 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using FluentValidation;
 using MediatR;
-using Volo.Abp;
 using Volo.Abp.Domain.Repositories;
 using Wesaya.Menu.Items;
 
@@ -11,6 +11,19 @@ namespace Wesaya.Menu.Items.Commands;
 public record RemoveExtraItemFromMenuItemCommand(Guid Id, string ExtraItemName)
     : IRequest<MenuItemDto>;
 
+public class RemoveExtraItemFromMenuItemCommandValidator : AbstractValidator<RemoveExtraItemFromMenuItemCommand>
+{
+    public RemoveExtraItemFromMenuItemCommandValidator()
+    {
+        RuleFor(x => x.Id)
+            .NotEmpty();
+
+        RuleFor(x => x.ExtraItemName)
+            .NotEmpty()
+            .MaximumLength(MenuConsts.MaxExtraItemNameLength);
+    }
+}
+
 public class RemoveExtraItemFromMenuItemCommandHandler(IRepository<MenuItem, Guid> menuItemRepository)
     : IRequestHandler<RemoveExtraItemFromMenuItemCommand, MenuItemDto>
 {
@@ -18,9 +31,6 @@ public class RemoveExtraItemFromMenuItemCommandHandler(IRepository<MenuItem, Gui
         RemoveExtraItemFromMenuItemCommand request,
         CancellationToken cancellationToken)
     {
-        Check.NotDefaultOrNull<Guid>(request.Id, nameof(request.Id));
-        Check.NotNullOrWhiteSpace(request.ExtraItemName, nameof(request.ExtraItemName), MenuConsts.MaxExtraItemNameLength);
-
         var item = await menuItemRepository.GetAsync(
             request.Id,
             cancellationToken: cancellationToken);

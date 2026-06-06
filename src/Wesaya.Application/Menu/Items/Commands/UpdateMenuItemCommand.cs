@@ -1,16 +1,68 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using FluentValidation;
 using MediatR;
-using Volo.Abp;
 using Volo.Abp.Domain.Repositories;
 using Wesaya.Menu.Items;
-using Wesaya.Menu.Exceptions;
 
 namespace Wesaya.Menu.Items.Commands;
 
 public record UpdateMenuItemCommand(Guid Id, CreateUpdateMenuItemDto Input)
     : IRequest<MenuItemDto>;
+
+public class UpdateMenuItemCommandValidator : AbstractValidator<UpdateMenuItemCommand>
+{
+    public UpdateMenuItemCommandValidator()
+    {
+        RuleFor(x => x.Id)
+            .NotEmpty();
+
+        RuleFor(x => x.Input)
+            .NotNull();
+
+        When(x => x.Input != null, () =>
+        {
+            RuleFor(x => x.Input.CategoryId)
+                .NotEmpty();
+
+            RuleFor(x => x.Input.Name)
+                .NotNull();
+
+            When(x => x.Input.Name != null, () =>
+            {
+                RuleFor(x => x.Input.Name.English)
+                    .NotEmpty()
+                    .MaximumLength(MenuConsts.MaxItemNameLength);
+
+                RuleFor(x => x.Input.Name.Arabic)
+                    .NotEmpty()
+                    .MaximumLength(MenuConsts.MaxItemNameLength);
+            });
+
+            When(x => x.Input.Description != null, () =>
+            {
+                RuleFor(x => x.Input.Description!.English)
+                    .MaximumLength(MenuConsts.MaxItemDescriptionLength);
+
+                RuleFor(x => x.Input.Description!.Arabic)
+                    .MaximumLength(MenuConsts.MaxItemDescriptionLength);
+            });
+
+            RuleFor(x => x.Input.Price)
+                .GreaterThanOrEqualTo(0);
+
+            RuleFor(x => x.Input.PreparationTimeMinutes)
+                .GreaterThanOrEqualTo(0);
+
+            When(x => x.Input.ExtraItems != null, () =>
+            {
+                RuleForEach(x => x.Input.ExtraItems)
+                    .SetValidator(new CreateUpdateExtraItemDtoValidator());
+            });
+        });
+    }
+}
 
 public class UpdateMenuItemCommandHandler(
     IRepository<MenuItem, Guid> menuItemRepository,
@@ -21,8 +73,6 @@ public class UpdateMenuItemCommandHandler(
         UpdateMenuItemCommand request,
         CancellationToken cancellationToken)
     {
-        Validate(request);
-
         await categoryRepository.GetAsync(
             request.Input.CategoryId,
             cancellationToken: cancellationToken);
@@ -56,23 +106,5 @@ public class UpdateMenuItemCommandHandler(
         await menuItemRepository.UpdateAsync(item, cancellationToken: cancellationToken);
 
         return MenuItemDtoMapper.ToDto(item);
-    }
-
-    private static void Validate(UpdateMenuItemCommand request)
-    {
-        Check.NotDefaultOrNull<Guid>(request.Id, nameof(request.Id));
-        Check.NotNull(request.Input, nameof(request.Input));
-        Check.NotDefaultOrNull<Guid>(request.Input.CategoryId, nameof(request.Input.CategoryId));
-        Check.NotNull(request.Input.Name, nameof(request.Input.Name));
-
-        if (request.Input.Price < 0)
-        {
-            throw new MenuItemPriceCannotBeNegativeException();
-        }
-
-        if (request.Input.PreparationTimeMinutes < 0)
-        {
-            throw new PreparationTimeCannotBeNegativeException();
-        }
     }
 }

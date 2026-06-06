@@ -5,7 +5,7 @@ using Volo.Abp.Domain.Values;
 
 namespace Wesaya.Localization;
 
-public class OptionalLocalizedString : ValueObject
+public sealed class OptionalLocalizedString : ValueObject
 {
     public string? English { get; private set; }
 

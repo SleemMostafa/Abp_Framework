@@ -1,16 +1,33 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using FluentValidation;
 using MediatR;
-using Volo.Abp;
 using Volo.Abp.Domain.Repositories;
 using Wesaya.Menu.Items;
-using Wesaya.Menu.Exceptions;
 
 namespace Wesaya.Menu.Items.Commands;
 
 public record AddExtraItemToMenuItemCommand(Guid Id, CreateUpdateExtraItemDto Input)
     : IRequest<MenuItemDto>;
+
+public class AddExtraItemToMenuItemCommandValidator : AbstractValidator<AddExtraItemToMenuItemCommand>
+{
+    public AddExtraItemToMenuItemCommandValidator()
+    {
+        RuleFor(x => x.Id)
+            .NotEmpty();
+
+        RuleFor(x => x.Input)
+            .NotNull();
+
+        When(x => x.Input != null, () =>
+        {
+            RuleFor(x => x.Input)
+                .SetValidator(new CreateUpdateExtraItemDtoValidator());
+        });
+    }
+}
 
 public class AddExtraItemToMenuItemCommandHandler(IRepository<MenuItem, Guid> menuItemRepository)
     : IRequestHandler<AddExtraItemToMenuItemCommand, MenuItemDto>
@@ -19,8 +36,6 @@ public class AddExtraItemToMenuItemCommandHandler(IRepository<MenuItem, Guid> me
         AddExtraItemToMenuItemCommand request,
         CancellationToken cancellationToken)
     {
-        Validate(request);
-
         var item = await menuItemRepository.GetAsync(
             request.Id,
             cancellationToken: cancellationToken);
@@ -34,17 +49,5 @@ public class AddExtraItemToMenuItemCommandHandler(IRepository<MenuItem, Guid> me
         await menuItemRepository.UpdateAsync(item, cancellationToken: cancellationToken);
 
         return MenuItemDtoMapper.ToDto(item);
-    }
-
-    private static void Validate(AddExtraItemToMenuItemCommand request)
-    {
-        Check.NotDefaultOrNull<Guid>(request.Id, nameof(request.Id));
-        Check.NotNull(request.Input, nameof(request.Input));
-        Check.NotNull(request.Input.Name, nameof(request.Input.Name));
-
-        if (request.Input.Price < 0)
-        {
-            throw new ExtraItemPriceCannotBeNegativeException();
-        }
     }
 }

@@ -1,14 +1,23 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using FluentValidation;
 using MediatR;
-using Volo.Abp;
 using Volo.Abp.Domain.Repositories;
 using Wesaya.Menu.Categories;
 
 namespace Wesaya.Menu.Categories.Queries;
 
 public record GetMenuCategoryQuery(Guid Id) : IRequest<MenuCategoryDto>;
+
+public class GetMenuCategoryQueryValidator : AbstractValidator<GetMenuCategoryQuery>
+{
+    public GetMenuCategoryQueryValidator()
+    {
+        RuleFor(x => x.Id)
+            .NotEmpty();
+    }
+}
 
 public class GetMenuCategoryQueryHandler(IRepository<MenuCategory, Guid> categoryRepository)
     : IRequestHandler<GetMenuCategoryQuery, MenuCategoryDto>
@@ -17,8 +26,6 @@ public class GetMenuCategoryQueryHandler(IRepository<MenuCategory, Guid> categor
         GetMenuCategoryQuery request,
         CancellationToken cancellationToken)
     {
-        Check.NotDefaultOrNull<Guid>(request.Id, nameof(request.Id));
-
         var category = await categoryRepository.GetAsync(
             request.Id,
             cancellationToken: cancellationToken);

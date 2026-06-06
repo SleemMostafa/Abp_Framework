@@ -7,17 +7,9 @@ using Volo.Abp.DependencyInjection;
 
 namespace Wesaya.EntityFrameworkCore;
 
-public class EntityFrameworkCoreWesayaDbSchemaMigrator
+public class EntityFrameworkCoreWesayaDbSchemaMigrator(IServiceProvider serviceProvider)
     : IWesayaDbSchemaMigrator, ITransientDependency
 {
-    private readonly IServiceProvider _serviceProvider;
-
-    public EntityFrameworkCoreWesayaDbSchemaMigrator(
-        IServiceProvider serviceProvider)
-    {
-        _serviceProvider = serviceProvider;
-    }
-
     public async Task MigrateAsync()
     {
         /* We intentionally resolve the WesayaDbContext
@@ -26,7 +18,7 @@ public class EntityFrameworkCoreWesayaDbSchemaMigrator
          * current scope.
          */
 
-        await _serviceProvider
+        await serviceProvider
             .GetRequiredService<WesayaDbContext>()
             .Database
             .MigrateAsync();

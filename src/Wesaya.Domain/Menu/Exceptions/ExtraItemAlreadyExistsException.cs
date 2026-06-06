@@ -2,5 +2,5 @@ using Volo.Abp;
 
 namespace Wesaya.Menu.Exceptions;
 
-public class ExtraItemAlreadyExistsException()
+public sealed class ExtraItemAlreadyExistsException()
     : BusinessException(WesayaErrorCodes.ExtraItemAlreadyExists);

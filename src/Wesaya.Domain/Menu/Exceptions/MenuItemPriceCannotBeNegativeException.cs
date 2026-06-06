@@ -2,5 +2,5 @@ using Volo.Abp;
 
 namespace Wesaya.Menu.Exceptions;
 
-public class MenuItemPriceCannotBeNegativeException()
+public sealed class MenuItemPriceCannotBeNegativeException()
     : BusinessException(WesayaErrorCodes.MenuItemPriceCannotBeNegative);

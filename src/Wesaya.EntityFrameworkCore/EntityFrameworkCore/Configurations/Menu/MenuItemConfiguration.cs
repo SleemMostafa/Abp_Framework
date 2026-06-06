@@ -55,7 +55,8 @@ public class MenuItemConfiguration : IEntityTypeConfiguration<MenuItem>
             extraItemBuilder.ToTable(WesayaConsts.DbTablePrefix + "MenuItemExtraItems", WesayaConsts.DbSchema);
 
             extraItemBuilder.Property<Guid>("MenuItemId");
-            extraItemBuilder.Property<int>("Id");
+            extraItemBuilder.Property<Guid>("Id")
+                .ValueGeneratedOnAdd();
             extraItemBuilder.HasKey("MenuItemId", "Id");
 
             extraItemBuilder.OwnsOne(x => x.Name, nameBuilder =>

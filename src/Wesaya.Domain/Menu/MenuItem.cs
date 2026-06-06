@@ -8,7 +8,7 @@ using Wesaya.Menu.Exceptions;
 
 namespace Wesaya.Menu;
 
-public class MenuItem : FullAuditedAggregateRoot<Guid>
+public sealed class MenuItem : FullAuditedAggregateRoot<Guid>
 {
     public Guid CategoryId { get; private set; }
 

@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using FluentValidation;
 using MediatR;
 using Volo.Abp.Application.Dtos;
 using Volo.Abp.Domain.Repositories;
@@ -11,6 +12,24 @@ namespace Wesaya.Menu.Categories.Queries;
 
 public record GetMenuCategoryListQuery(PagedAndSortedResultRequestDto Input)
     : IRequest<PagedResultDto<MenuCategoryDto>>;
+
+public class GetMenuCategoryListQueryValidator : AbstractValidator<GetMenuCategoryListQuery>
+{
+    public GetMenuCategoryListQueryValidator()
+    {
+        RuleFor(x => x.Input)
+            .NotNull();
+
+        When(x => x.Input != null, () =>
+        {
+            RuleFor(x => x.Input.SkipCount)
+                .GreaterThanOrEqualTo(0);
+
+            RuleFor(x => x.Input.MaxResultCount)
+                .InclusiveBetween(1, 1000);
+        });
+    }
+}
 
 public class GetMenuCategoryListQueryHandler(IRepository<MenuCategory, Guid> categoryRepository)
     : IRequestHandler<GetMenuCategoryListQuery, PagedResultDto<MenuCategoryDto>>

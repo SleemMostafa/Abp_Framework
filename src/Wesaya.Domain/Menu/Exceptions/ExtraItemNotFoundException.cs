@@ -2,5 +2,5 @@ using Volo.Abp;
 
 namespace Wesaya.Menu.Exceptions;
 
-public class ExtraItemNotFoundException()
+public sealed class ExtraItemNotFoundException()
     : BusinessException(WesayaErrorCodes.ExtraItemNotFound);

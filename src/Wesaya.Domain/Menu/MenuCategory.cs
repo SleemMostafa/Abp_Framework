@@ -4,7 +4,7 @@ using Wesaya.Localization;
 
 namespace Wesaya.Menu;
 
-public class MenuCategory : FullAuditedAggregateRoot<Guid>
+public sealed class MenuCategory : FullAuditedAggregateRoot<Guid>
 {
     public StrongLocalizedString Name { get; private set; } = null!;
 

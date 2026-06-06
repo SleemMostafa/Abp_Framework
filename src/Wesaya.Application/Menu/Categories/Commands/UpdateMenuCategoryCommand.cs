@@ -1,8 +1,8 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using FluentValidation;
 using MediatR;
-using Volo.Abp;
 using Volo.Abp.Domain.Repositories;
 using Wesaya.Menu.Categories;
 
@@ -11,6 +11,38 @@ namespace Wesaya.Menu.Categories.Commands;
 public record UpdateMenuCategoryCommand(Guid Id, CreateUpdateMenuCategoryDto Input)
     : IRequest<MenuCategoryDto>;
 
+public class UpdateMenuCategoryCommandValidator : AbstractValidator<UpdateMenuCategoryCommand>
+{
+    public UpdateMenuCategoryCommandValidator()
+    {
+        RuleFor(x => x.Id)
+            .NotEmpty();
+
+        RuleFor(x => x.Input)
+            .NotNull();
+
+        When(x => x.Input != null, () =>
+        {
+            RuleFor(x => x.Input.Name)
+                .NotNull();
+
+            When(x => x.Input.Name != null, () =>
+            {
+                RuleFor(x => x.Input.Name.English)
+                    .NotEmpty()
+                    .MaximumLength(MenuConsts.MaxCategoryNameLength);
+
+                RuleFor(x => x.Input.Name.Arabic)
+                    .NotEmpty()
+                    .MaximumLength(MenuConsts.MaxCategoryNameLength);
+            });
+
+            RuleFor(x => x.Input.DisplayOrder)
+                .GreaterThanOrEqualTo(0);
+        });
+    }
+}
+
 public class UpdateMenuCategoryCommandHandler(IRepository<MenuCategory, Guid> categoryRepository)
     : IRequestHandler<UpdateMenuCategoryCommand, MenuCategoryDto>
 {
@@ -18,8 +50,6 @@ public class UpdateMenuCategoryCommandHandler(IRepository<MenuCategory, Guid> ca
         UpdateMenuCategoryCommand request,
         CancellationToken cancellationToken)
     {
-        Validate(request);
-
         var category = await categoryRepository.GetAsync(
             request.Id,
             cancellationToken: cancellationToken);
@@ -34,12 +64,5 @@ public class UpdateMenuCategoryCommandHandler(IRepository<MenuCategory, Guid> ca
         await categoryRepository.UpdateAsync(category, cancellationToken: cancellationToken);
 
         return MenuCategoryDtoMapper.ToDto(category);
-    }
-
-    private static void Validate(UpdateMenuCategoryCommand request)
-    {
-        Check.NotDefaultOrNull<Guid>(request.Id, nameof(request.Id));
-        Check.NotNull(request.Input, nameof(request.Input));
-        Check.NotNull(request.Input.Name, nameof(request.Input.Name));
     }
 }
