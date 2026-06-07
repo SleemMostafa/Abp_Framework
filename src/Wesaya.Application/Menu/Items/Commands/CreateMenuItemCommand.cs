@@ -3,8 +3,11 @@ using System.Threading;
 using System.Threading.Tasks;
 using FluentValidation;
 using MediatR;
+using Microsoft.Extensions.Localization;
 using Volo.Abp.Domain.Repositories;
 using Volo.Abp.Guids;
+using Wesaya.Localization;
+using Wesaya.Menu.Exceptions;
 using Wesaya.Menu.Items;
 
 namespace Wesaya.Menu.Items.Commands;
@@ -14,49 +17,64 @@ public record CreateMenuItemCommand(CreateUpdateMenuItemDto Input)
 
 public class CreateMenuItemCommandValidator : AbstractValidator<CreateMenuItemCommand>
 {
-    public CreateMenuItemCommandValidator()
+    public CreateMenuItemCommandValidator(IStringLocalizer<WesayaResource> localizer)
     {
         RuleFor(x => x.Input)
-            .NotNull();
+            .NotNull()
+            .WithMessage(localizer["MenuItem:RequestRequired"]);
 
         When(x => x.Input != null, () =>
         {
             RuleFor(x => x.Input.CategoryId)
-                .NotEmpty();
+                .NotEmpty()
+                .WithMessage(localizer["MenuItem:CategoryRequired"]);
 
             RuleFor(x => x.Input.Name)
-                .NotNull();
+                .NotNull()
+                .WithMessage(localizer["MenuItem:NameRequired"]);
 
             When(x => x.Input.Name != null, () =>
             {
                 RuleFor(x => x.Input.Name.English)
                     .NotEmpty()
-                    .MaximumLength(MenuConsts.MaxItemNameLength);
+                    .WithMessage(localizer["MenuItem:EnglishNameRequired"])
+                    .MaximumLength(MenuConsts.MaxItemNameLength)
+                    .WithMessage(localizer["MenuItem:NameMaxLength", MenuConsts.MaxItemNameLength]);
 
                 RuleFor(x => x.Input.Name.Arabic)
                     .NotEmpty()
-                    .MaximumLength(MenuConsts.MaxItemNameLength);
+                    .WithMessage(localizer["MenuItem:ArabicNameRequired"])
+                    .MaximumLength(MenuConsts.MaxItemNameLength)
+                    .WithMessage(localizer["MenuItem:NameMaxLength", MenuConsts.MaxItemNameLength]);
             });
 
             When(x => x.Input.Description != null, () =>
             {
                 RuleFor(x => x.Input.Description!.English)
-                    .MaximumLength(MenuConsts.MaxItemDescriptionLength);
+                    .MaximumLength(MenuConsts.MaxItemDescriptionLength)
+                    .WithMessage(localizer["MenuItem:DescriptionMaxLength", MenuConsts.MaxItemDescriptionLength]);
 
                 RuleFor(x => x.Input.Description!.Arabic)
-                    .MaximumLength(MenuConsts.MaxItemDescriptionLength);
+                    .MaximumLength(MenuConsts.MaxItemDescriptionLength)
+                    .WithMessage(localizer["MenuItem:DescriptionMaxLength", MenuConsts.MaxItemDescriptionLength]);
             });
 
             RuleFor(x => x.Input.Price)
-                .GreaterThanOrEqualTo(0);
+                .GreaterThanOrEqualTo(0)
+                .WithMessage(localizer["MenuItem:PriceMustBePositive"]);
 
             RuleFor(x => x.Input.PreparationTimeMinutes)
-                .GreaterThanOrEqualTo(0);
+                .GreaterThanOrEqualTo(0)
+                .WithMessage(localizer["MenuItem:PreparationTimeMustBePositive"]);
+
+            RuleFor(x => x.Input.ExtraItems)
+                .NotNull()
+                .WithMessage(localizer["MenuItem:ExtraItemsRequired"]);
 
             When(x => x.Input.ExtraItems != null, () =>
             {
                 RuleForEach(x => x.Input.ExtraItems)
-                    .SetValidator(new CreateUpdateExtraItemDtoValidator());
+                    .SetValidator(new CreateUpdateExtraItemDtoValidator(localizer));
             });
         });
     }
@@ -64,24 +82,30 @@ public class CreateMenuItemCommandValidator : AbstractValidator<CreateMenuItemCo
 
 public class CreateUpdateExtraItemDtoValidator : AbstractValidator<CreateUpdateExtraItemDto>
 {
-    public CreateUpdateExtraItemDtoValidator()
+    public CreateUpdateExtraItemDtoValidator(IStringLocalizer<WesayaResource> localizer)
     {
         RuleFor(x => x.Name)
-            .NotNull();
+            .NotNull()
+            .WithMessage(localizer["ExtraItem:NameRequired"]);
 
         When(x => x.Name != null, () =>
         {
             RuleFor(x => x.Name.English)
                 .NotEmpty()
-                .MaximumLength(MenuConsts.MaxExtraItemNameLength);
+                .WithMessage(localizer["ExtraItem:EnglishNameRequired"])
+                .MaximumLength(MenuConsts.MaxExtraItemNameLength)
+                .WithMessage(localizer["ExtraItem:NameMaxLength", MenuConsts.MaxExtraItemNameLength]);
 
             RuleFor(x => x.Name.Arabic)
                 .NotEmpty()
-                .MaximumLength(MenuConsts.MaxExtraItemNameLength);
+                .WithMessage(localizer["ExtraItem:ArabicNameRequired"])
+                .MaximumLength(MenuConsts.MaxExtraItemNameLength)
+                .WithMessage(localizer["ExtraItem:NameMaxLength", MenuConsts.MaxExtraItemNameLength]);
         });
 
         RuleFor(x => x.Price)
-            .GreaterThanOrEqualTo(0);
+            .GreaterThanOrEqualTo(0)
+            .WithMessage(localizer["ExtraItem:PriceMustBePositive"]);
     }
 }
 
@@ -95,9 +119,10 @@ public class CreateMenuItemCommandHandler(
         CreateMenuItemCommand request,
         CancellationToken cancellationToken)
     {
-        await categoryRepository.GetAsync(
+        _ = await categoryRepository.FindAsync(
             request.Input.CategoryId,
-            cancellationToken: cancellationToken);
+            cancellationToken: cancellationToken)
+            ?? throw new MenuCategoryNotFoundException();
 
         var item = MenuItem.Create(
             guidGenerator.Create(),

@@ -146,7 +146,7 @@ public sealed class MenuItemDataSeeder(
 
         if (category == null)
         {
-            throw new MenuCategoryNotFoundException(englishName);
+            throw new MenuCategoryNotFoundException();
         }
 
         return category.Id;

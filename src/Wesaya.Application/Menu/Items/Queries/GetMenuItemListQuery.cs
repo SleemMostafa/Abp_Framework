@@ -4,9 +4,10 @@ using System.Threading;
 using System.Threading.Tasks;
 using FluentValidation;
 using MediatR;
+using Microsoft.Extensions.Localization;
 using Volo.Abp.Application.Dtos;
 using Volo.Abp.Domain.Repositories;
-using Wesaya.Menu.Items;
+using Wesaya.Localization;
 
 namespace Wesaya.Menu.Items.Queries;
 
@@ -15,18 +16,21 @@ public record GetMenuItemListQuery(PagedAndSortedResultRequestDto Input)
 
 public class GetMenuItemListQueryValidator : AbstractValidator<GetMenuItemListQuery>
 {
-    public GetMenuItemListQueryValidator()
+    public GetMenuItemListQueryValidator(IStringLocalizer<WesayaResource> localizer)
     {
         RuleFor(x => x.Input)
-            .NotNull();
+            .NotNull()
+            .WithMessage(localizer["Paging:RequestRequired"]);
 
         When(x => x.Input != null, () =>
         {
             RuleFor(x => x.Input.SkipCount)
-                .GreaterThanOrEqualTo(0);
+                .GreaterThanOrEqualTo(0)
+                .WithMessage(localizer["Paging:SkipCountMustBePositive"]);
 
             RuleFor(x => x.Input.MaxResultCount)
-                .InclusiveBetween(1, 1000);
+                .InclusiveBetween(1, 1000)
+                .WithMessage(localizer["Paging:MaxResultCountRange", 1, 1000]);
         });
     }
 }

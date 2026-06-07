@@ -3,8 +3,10 @@ using System.Threading;
 using System.Threading.Tasks;
 using FluentValidation;
 using MediatR;
+using Microsoft.Extensions.Localization;
 using Volo.Abp.Domain.Repositories;
-using Wesaya.Menu.Categories;
+using Wesaya.Localization;
+using Wesaya.Menu.Exceptions;
 
 namespace Wesaya.Menu.Categories.Commands;
 
@@ -13,32 +15,39 @@ public record UpdateMenuCategoryCommand(Guid Id, CreateUpdateMenuCategoryDto Inp
 
 public class UpdateMenuCategoryCommandValidator : AbstractValidator<UpdateMenuCategoryCommand>
 {
-    public UpdateMenuCategoryCommandValidator()
+    public UpdateMenuCategoryCommandValidator(IStringLocalizer<WesayaResource> localizer)
     {
         RuleFor(x => x.Id)
             .NotEmpty();
 
         RuleFor(x => x.Input)
-            .NotNull();
+            .NotNull()
+            .WithMessage(localizer["MenuCategory:RequestRequired"]);
 
         When(x => x.Input != null, () =>
         {
             RuleFor(x => x.Input.Name)
-                .NotNull();
+                .NotNull()
+                .WithMessage(localizer["MenuCategory:NameRequired"]);
 
             When(x => x.Input.Name != null, () =>
             {
-                RuleFor(x => x.Input.Name.English)
+                RuleFor(x => x.Input.Name!.English)
                     .NotEmpty()
-                    .MaximumLength(MenuConsts.MaxCategoryNameLength);
+                    .WithMessage(localizer["MenuCategory:EnglishNameRequired"])
+                    .MaximumLength(MenuConsts.MaxCategoryNameLength)
+                    .WithMessage(localizer["MenuCategory:NameMaxLength", MenuConsts.MaxCategoryNameLength]);
 
-                RuleFor(x => x.Input.Name.Arabic)
+                RuleFor(x => x.Input.Name!.Arabic)
                     .NotEmpty()
-                    .MaximumLength(MenuConsts.MaxCategoryNameLength);
+                    .WithMessage(localizer["MenuCategory:ArabicNameRequired"])
+                    .MaximumLength(MenuConsts.MaxCategoryNameLength)
+                    .WithMessage(localizer["MenuCategory:NameMaxLength", MenuConsts.MaxCategoryNameLength]);
             });
 
             RuleFor(x => x.Input.DisplayOrder)
-                .GreaterThanOrEqualTo(0);
+                .GreaterThanOrEqualTo(0)
+                .WithMessage(localizer["MenuCategory:DisplayOrderMustBePositive"]);
         });
     }
 }
@@ -50,13 +59,14 @@ public class UpdateMenuCategoryCommandHandler(IRepository<MenuCategory, Guid> ca
         UpdateMenuCategoryCommand request,
         CancellationToken cancellationToken)
     {
-        var category = await categoryRepository.GetAsync(
+        var category = await categoryRepository.FindAsync(
             request.Id,
-            cancellationToken: cancellationToken);
+            cancellationToken: cancellationToken)
+            ?? throw new MenuCategoryNotFoundException();
 
         category.Update(
             LocalizedStringFactory.CreateStrong(
-                request.Input.Name,
+                request.Input.Name!,
                 MenuConsts.MaxCategoryNameLength),
             request.Input.DisplayOrder,
             request.Input.IsActive);

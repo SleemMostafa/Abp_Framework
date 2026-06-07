@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -32,9 +33,16 @@ public class ValidationBehavior<TRequest, TResponse>(IEnumerable<IValidator<TReq
 
         if (failures.Count > 0)
         {
-            throw new ValidationException(failures);
+            throw new WesayaValidationException(
+                failures
+                    .Select(failure => new ValidationResult(
+                        failure.ErrorMessage,
+                        string.IsNullOrWhiteSpace(failure.PropertyName)
+                            ? []
+                            : [failure.PropertyName]))
+                    .ToList());
         }
 
-        return await next();
+        return await next(cancellationToken);
     }
 }

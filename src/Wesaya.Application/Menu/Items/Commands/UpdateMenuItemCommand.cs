@@ -3,8 +3,10 @@ using System.Threading;
 using System.Threading.Tasks;
 using FluentValidation;
 using MediatR;
+using Microsoft.Extensions.Localization;
 using Volo.Abp.Domain.Repositories;
-using Wesaya.Menu.Items;
+using Wesaya.Localization;
+using Wesaya.Menu.Exceptions;
 
 namespace Wesaya.Menu.Items.Commands;
 
@@ -13,52 +15,68 @@ public record UpdateMenuItemCommand(Guid Id, CreateUpdateMenuItemDto Input)
 
 public class UpdateMenuItemCommandValidator : AbstractValidator<UpdateMenuItemCommand>
 {
-    public UpdateMenuItemCommandValidator()
+    public UpdateMenuItemCommandValidator(IStringLocalizer<WesayaResource> localizer)
     {
         RuleFor(x => x.Id)
-            .NotEmpty();
+            .NotEmpty()
+            .WithMessage(localizer["MenuItem:IdRequired"]);
 
         RuleFor(x => x.Input)
-            .NotNull();
+            .NotNull()
+            .WithMessage(localizer["MenuItem:RequestRequired"]);
 
         When(x => x.Input != null, () =>
         {
             RuleFor(x => x.Input.CategoryId)
-                .NotEmpty();
+                .NotEmpty()
+                .WithMessage(localizer["MenuItem:CategoryRequired"]);
 
             RuleFor(x => x.Input.Name)
-                .NotNull();
+                .NotNull()
+                .WithMessage(localizer["MenuItem:NameRequired"]);
 
             When(x => x.Input.Name != null, () =>
             {
                 RuleFor(x => x.Input.Name.English)
                     .NotEmpty()
-                    .MaximumLength(MenuConsts.MaxItemNameLength);
+                    .WithMessage(localizer["MenuItem:EnglishNameRequired"])
+                    .MaximumLength(MenuConsts.MaxItemNameLength)
+                    .WithMessage(localizer["MenuItem:NameMaxLength", MenuConsts.MaxItemNameLength]);
 
                 RuleFor(x => x.Input.Name.Arabic)
                     .NotEmpty()
-                    .MaximumLength(MenuConsts.MaxItemNameLength);
+                    .WithMessage(localizer["MenuItem:ArabicNameRequired"])
+                    .MaximumLength(MenuConsts.MaxItemNameLength)
+                    .WithMessage(localizer["MenuItem:NameMaxLength", MenuConsts.MaxItemNameLength]);
             });
 
             When(x => x.Input.Description != null, () =>
             {
                 RuleFor(x => x.Input.Description!.English)
-                    .MaximumLength(MenuConsts.MaxItemDescriptionLength);
+                    .MaximumLength(MenuConsts.MaxItemDescriptionLength)
+                    .WithMessage(localizer["MenuItem:DescriptionMaxLength", MenuConsts.MaxItemDescriptionLength]);
 
                 RuleFor(x => x.Input.Description!.Arabic)
-                    .MaximumLength(MenuConsts.MaxItemDescriptionLength);
+                    .MaximumLength(MenuConsts.MaxItemDescriptionLength)
+                    .WithMessage(localizer["MenuItem:DescriptionMaxLength", MenuConsts.MaxItemDescriptionLength]);
             });
 
             RuleFor(x => x.Input.Price)
-                .GreaterThanOrEqualTo(0);
+                .GreaterThanOrEqualTo(0)
+                .WithMessage(localizer["MenuItem:PriceMustBePositive"]);
 
             RuleFor(x => x.Input.PreparationTimeMinutes)
-                .GreaterThanOrEqualTo(0);
+                .GreaterThanOrEqualTo(0)
+                .WithMessage(localizer["MenuItem:PreparationTimeMustBePositive"]);
+
+            RuleFor(x => x.Input.ExtraItems)
+                .NotNull()
+                .WithMessage(localizer["MenuItem:ExtraItemsRequired"]);
 
             When(x => x.Input.ExtraItems != null, () =>
             {
                 RuleForEach(x => x.Input.ExtraItems)
-                    .SetValidator(new CreateUpdateExtraItemDtoValidator());
+                    .SetValidator(new CreateUpdateExtraItemDtoValidator(localizer));
             });
         });
     }
@@ -73,13 +91,15 @@ public class UpdateMenuItemCommandHandler(
         UpdateMenuItemCommand request,
         CancellationToken cancellationToken)
     {
-        await categoryRepository.GetAsync(
+        _ = await categoryRepository.FindAsync(
             request.Input.CategoryId,
-            cancellationToken: cancellationToken);
+            cancellationToken: cancellationToken)
+            ?? throw new MenuCategoryNotFoundException();
 
-        var item = await menuItemRepository.GetAsync(
+        var item = await menuItemRepository.FindAsync(
             request.Id,
-            cancellationToken: cancellationToken);
+            cancellationToken: cancellationToken)
+            ?? throw new MenuItemNotFoundException();
 
         item.Update(
             request.Input.CategoryId,

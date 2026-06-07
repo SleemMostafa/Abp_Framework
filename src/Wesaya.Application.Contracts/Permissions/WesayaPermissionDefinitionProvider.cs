@@ -8,9 +8,19 @@ public class WesayaPermissionDefinitionProvider : PermissionDefinitionProvider
 {
     public override void Define(IPermissionDefinitionContext context)
     {
-        var myGroup = context.AddGroup(WesayaPermissions.GroupName);
-        //Define your own permissions here. Example:
-        //myGroup.AddPermission(WesayaPermissions.MyPermission1, L("Permission:MyPermission1"));
+        var wesayaGroup = context.AddGroup(WesayaPermissions.GroupName, L("Permission:Wesaya"));
+
+        var menuCategories = wesayaGroup.AddPermission(
+            WesayaPermissions.MenuCategories.Default,
+            L("Permission:MenuCategories"));
+
+        menuCategories.AddChild(
+            WesayaPermissions.MenuCategories.Update,
+            L("Permission:MenuCategories.Update"));
+
+        menuCategories.AddChild(
+            WesayaPermissions.MenuCategories.Delete,
+            L("Permission:MenuCategories.Delete"));
     }
 
     private static LocalizableString L(string name)

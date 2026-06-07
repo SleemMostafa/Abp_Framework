@@ -3,7 +3,10 @@ using System.Threading;
 using System.Threading.Tasks;
 using FluentValidation;
 using MediatR;
+using Microsoft.Extensions.Localization;
 using Volo.Abp.Domain.Repositories;
+using Wesaya.Localization;
+using Wesaya.Menu.Exceptions;
 using Wesaya.Menu.Items;
 
 namespace Wesaya.Menu.Items.Queries;
@@ -12,10 +15,11 @@ public record GetMenuItemQuery(Guid Id) : IRequest<MenuItemDto>;
 
 public class GetMenuItemQueryValidator : AbstractValidator<GetMenuItemQuery>
 {
-    public GetMenuItemQueryValidator()
+    public GetMenuItemQueryValidator(IStringLocalizer<WesayaResource> localizer)
     {
         RuleFor(x => x.Id)
-            .NotEmpty();
+            .NotEmpty()
+            .WithMessage(localizer["MenuItem:IdRequired"]);
     }
 }
 
@@ -26,9 +30,10 @@ public class GetMenuItemQueryHandler(IRepository<MenuItem, Guid> menuItemReposit
         GetMenuItemQuery request,
         CancellationToken cancellationToken)
     {
-        var item = await menuItemRepository.GetAsync(
+        var item = await menuItemRepository.FindAsync(
             request.Id,
-            cancellationToken: cancellationToken);
+            cancellationToken: cancellationToken)
+            ?? throw new MenuItemNotFoundException();
 
         return MenuItemDtoMapper.ToDto(item);
     }

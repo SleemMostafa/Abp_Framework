@@ -4,9 +4,9 @@ namespace Wesaya.Menu.Categories;
 
 public sealed class CreateUpdateMenuCategoryDto
 {
-    public required StrongLocalizedStringInputDto Name { get; init; }
+    public StrongLocalizedStringInputDto? Name { get; set; }
 
-    public required int DisplayOrder { get; init; }
+    public int DisplayOrder { get; set; }
 
-    public required bool IsActive { get; init; } = true;
+    public bool IsActive { get; set; } = true;
 }

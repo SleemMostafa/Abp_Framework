@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using FluentValidation;
 using MediatR;
 using Volo.Abp.Domain.Repositories;
+using Wesaya.Menu.Exceptions;
 
 namespace Wesaya.Menu.Categories.Commands;
 
@@ -25,6 +26,11 @@ public class DeleteMenuCategoryCommandHandler(IRepository<MenuCategory, Guid> ca
         DeleteMenuCategoryCommand request,
         CancellationToken cancellationToken)
     {
-        await categoryRepository.DeleteAsync(request.Id, cancellationToken: cancellationToken);
+        var category = await categoryRepository.FindAsync(
+            request.Id,
+            cancellationToken: cancellationToken)
+            ?? throw new MenuCategoryNotFoundException();
+
+        await categoryRepository.DeleteAsync(category, cancellationToken: cancellationToken);
     }
 }

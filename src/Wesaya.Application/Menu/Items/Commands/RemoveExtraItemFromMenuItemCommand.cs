@@ -3,7 +3,10 @@ using System.Threading;
 using System.Threading.Tasks;
 using FluentValidation;
 using MediatR;
+using Microsoft.Extensions.Localization;
 using Volo.Abp.Domain.Repositories;
+using Wesaya.Localization;
+using Wesaya.Menu.Exceptions;
 using Wesaya.Menu.Items;
 
 namespace Wesaya.Menu.Items.Commands;
@@ -13,14 +16,17 @@ public record RemoveExtraItemFromMenuItemCommand(Guid Id, string ExtraItemName)
 
 public class RemoveExtraItemFromMenuItemCommandValidator : AbstractValidator<RemoveExtraItemFromMenuItemCommand>
 {
-    public RemoveExtraItemFromMenuItemCommandValidator()
+    public RemoveExtraItemFromMenuItemCommandValidator(IStringLocalizer<WesayaResource> localizer)
     {
         RuleFor(x => x.Id)
-            .NotEmpty();
+            .NotEmpty()
+            .WithMessage(localizer["MenuItem:IdRequired"]);
 
         RuleFor(x => x.ExtraItemName)
             .NotEmpty()
-            .MaximumLength(MenuConsts.MaxExtraItemNameLength);
+            .WithMessage(localizer["ExtraItem:NameRequired"])
+            .MaximumLength(MenuConsts.MaxExtraItemNameLength)
+            .WithMessage(localizer["ExtraItem:NameMaxLength", MenuConsts.MaxExtraItemNameLength]);
     }
 }
 
@@ -31,9 +37,10 @@ public class RemoveExtraItemFromMenuItemCommandHandler(IRepository<MenuItem, Gui
         RemoveExtraItemFromMenuItemCommand request,
         CancellationToken cancellationToken)
     {
-        var item = await menuItemRepository.GetAsync(
+        var item = await menuItemRepository.FindAsync(
             request.Id,
-            cancellationToken: cancellationToken);
+            cancellationToken: cancellationToken)
+            ?? throw new MenuItemNotFoundException();
 
         item.RemoveExtraItem(request.ExtraItemName);
 

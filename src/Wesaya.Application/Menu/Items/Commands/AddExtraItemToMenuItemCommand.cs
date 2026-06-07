@@ -3,7 +3,10 @@ using System.Threading;
 using System.Threading.Tasks;
 using FluentValidation;
 using MediatR;
+using Microsoft.Extensions.Localization;
 using Volo.Abp.Domain.Repositories;
+using Wesaya.Localization;
+using Wesaya.Menu.Exceptions;
 using Wesaya.Menu.Items;
 
 namespace Wesaya.Menu.Items.Commands;
@@ -13,18 +16,20 @@ public record AddExtraItemToMenuItemCommand(Guid Id, CreateUpdateExtraItemDto In
 
 public class AddExtraItemToMenuItemCommandValidator : AbstractValidator<AddExtraItemToMenuItemCommand>
 {
-    public AddExtraItemToMenuItemCommandValidator()
+    public AddExtraItemToMenuItemCommandValidator(IStringLocalizer<WesayaResource> localizer)
     {
         RuleFor(x => x.Id)
-            .NotEmpty();
+            .NotEmpty()
+            .WithMessage(localizer["MenuItem:IdRequired"]);
 
         RuleFor(x => x.Input)
-            .NotNull();
+            .NotNull()
+            .WithMessage(localizer["ExtraItem:RequestRequired"]);
 
         When(x => x.Input != null, () =>
         {
             RuleFor(x => x.Input)
-                .SetValidator(new CreateUpdateExtraItemDtoValidator());
+                .SetValidator(new CreateUpdateExtraItemDtoValidator(localizer));
         });
     }
 }
@@ -36,9 +41,10 @@ public class AddExtraItemToMenuItemCommandHandler(IRepository<MenuItem, Guid> me
         AddExtraItemToMenuItemCommand request,
         CancellationToken cancellationToken)
     {
-        var item = await menuItemRepository.GetAsync(
+        var item = await menuItemRepository.FindAsync(
             request.Id,
-            cancellationToken: cancellationToken);
+            cancellationToken: cancellationToken)
+            ?? throw new MenuItemNotFoundException();
 
         item.AddExtraItem(
             LocalizedStringFactory.CreateStrong(

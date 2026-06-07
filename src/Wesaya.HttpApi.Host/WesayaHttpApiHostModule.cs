@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Cors;
@@ -12,17 +13,22 @@ using Microsoft.AspNetCore.Extensions.DependencyInjection;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Localization;
 using Wesaya.EntityFrameworkCore;
 using Volo.Abp.AspNetCore.Mvc.UI.Theme.LeptonXLite;
 using Volo.Abp.AspNetCore.Mvc.UI.Theme.LeptonXLite.Bundling;
 using Microsoft.OpenApi;
+using Microsoft.AspNetCore.Mvc;
 using OpenIddict.Validation.AspNetCore;
 using Volo.Abp;
 using Volo.Abp.Account;
 using Volo.Abp.Account.Web;
+using Volo.Abp.Application.Services;
 using Volo.Abp.AspNetCore.Mvc;
+using Volo.Abp.AspNetCore.Mvc.AntiForgery;
 using Volo.Abp.AspNetCore.Mvc.UI.Bundling;
 using Volo.Abp.AspNetCore.Mvc.UI.Theme.Shared;
+using Volo.Abp.AspNetCore.ExceptionHandling;
 using Volo.Abp.AspNetCore.Serilog;
 using Volo.Abp.Autofac;
 using Volo.Abp.Modularity;
@@ -30,6 +36,8 @@ using Volo.Abp.Security.Claims;
 using Volo.Abp.Swashbuckle;
 using Volo.Abp.UI.Navigation.Urls;
 using Volo.Abp.VirtualFileSystem;
+using Wesaya.ExceptionHandling;
+using Wesaya.Localization;
 
 namespace Wesaya;
 
@@ -64,6 +72,8 @@ public sealed class WesayaHttpApiHostModule : AbpModule
         var hostingEnvironment = context.Services.GetHostingEnvironment();
 
         ConfigureAuthentication(context);
+        ConfigureAntiForgery();
+        ConfigureExceptionHandling(context);
         ConfigureRequestLocalization(context);
         ConfigureBundles();
         ConfigureUrls(configuration);
@@ -76,9 +86,94 @@ public sealed class WesayaHttpApiHostModule : AbpModule
     private void ConfigureAuthentication(ServiceConfigurationContext context)
     {
         context.Services.ForwardIdentityAuthenticationForBearer(OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme);
+        context.Services.ConfigureApplicationCookie(options =>
+        {
+            options.Events.OnRedirectToLogin = redirectContext =>
+            {
+                if (IsApiRequest(redirectContext.Request))
+                {
+                    return WriteAuthenticationProblemAsync(
+                        redirectContext.HttpContext,
+                        StatusCodes.Status401Unauthorized,
+                        "Unauthorized",
+                        "AuthorizationFailed");
+                }
+
+                redirectContext.Response.Redirect(redirectContext.RedirectUri);
+                return Task.CompletedTask;
+            };
+
+            options.Events.OnRedirectToAccessDenied = redirectContext =>
+            {
+                if (IsApiRequest(redirectContext.Request))
+                {
+                    return WriteAuthenticationProblemAsync(
+                        redirectContext.HttpContext,
+                        StatusCodes.Status403Forbidden,
+                        "Forbidden",
+                        "AuthorizationFailed");
+                }
+
+                redirectContext.Response.Redirect(redirectContext.RedirectUri);
+                return Task.CompletedTask;
+            };
+        });
+
         context.Services.Configure<AbpClaimsPrincipalFactoryOptions>(options =>
         {
             options.IsDynamicClaimsEnabled = true;
+        });
+    }
+
+    private void ConfigureAntiForgery()
+    {
+        Configure<AbpAntiForgeryOptions>(options =>
+        {
+            options.AutoValidateFilter =
+                type => !typeof(IApplicationService).IsAssignableFrom(type);
+        });
+    }
+
+    private static bool IsApiRequest(HttpRequest request)
+    {
+        return request.Path.StartsWithSegments("/api", StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static async Task WriteAuthenticationProblemAsync(
+        HttpContext httpContext,
+        int statusCode,
+        string title,
+        string localizationKey)
+    {
+        var localizer = httpContext.RequestServices.GetRequiredService<IStringLocalizer<WesayaResource>>();
+
+        httpContext.Response.StatusCode = statusCode;
+        httpContext.Response.ContentType = "application/problem+json";
+
+        var problemDetails = new ProblemDetails
+        {
+            Title = title,
+            Detail = localizer[localizationKey],
+            Status = statusCode,
+            Instance = httpContext.Request.Path
+        };
+
+        problemDetails.Extensions.Add("traceId", httpContext.TraceIdentifier);
+
+        await httpContext.Response.WriteAsJsonAsync(problemDetails);
+    }
+
+    private void ConfigureExceptionHandling(ServiceConfigurationContext context)
+    {
+        context.Services.AddExceptionHandler<CustomExceptionHandler>();
+        context.Services.AddProblemDetails();
+
+        Configure<AbpExceptionHttpStatusCodeOptions>(options =>
+        {
+            options.Map(WesayaErrorCodes.MenuCategoryNotFound, HttpStatusCode.NotFound);
+            options.Map(WesayaErrorCodes.MenuItemNotFound, HttpStatusCode.NotFound);
+            options.Map(WesayaErrorCodes.ExtraItemNotFound, HttpStatusCode.NotFound);
+            options.Map(WesayaErrorCodes.ValidationError, HttpStatusCode.BadRequest);
         });
     }
 
@@ -151,7 +246,7 @@ public sealed class WesayaHttpApiHostModule : AbpModule
     // to read header language
     private sealed class LanguageHeaderRequestCultureProvider : RequestCultureProvider
     {
-        public const string HeaderName = "language";
+        public const string HeaderName = "Language";
 
         public override Task<ProviderCultureResult?> DetermineProviderCultureResult(HttpContext httpContext)
         {
@@ -220,19 +315,9 @@ public sealed class WesayaHttpApiHostModule : AbpModule
     public override void OnApplicationInitialization(ApplicationInitializationContext context)
     {
         var app = context.GetApplicationBuilder();
-        var env = context.GetEnvironment();
-
-        if (env.IsDevelopment())
-        {
-            app.UseDeveloperExceptionPage();
-        }
 
         app.UseAbpRequestLocalization();
-
-        if (!env.IsDevelopment())
-        {
-            app.UseErrorPage();
-        }
+        app.UseExceptionHandler();
 
         app.UseCorrelationId();
         app.MapAbpStaticAssets();
