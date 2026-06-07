@@ -7,7 +7,6 @@ using Microsoft.Extensions.Localization;
 using Volo.Abp.Domain.Repositories;
 using Wesaya.Localization;
 using Wesaya.Menu.Exceptions;
-using Wesaya.Menu.Items;
 
 namespace Wesaya.Menu.Items.Queries;
 

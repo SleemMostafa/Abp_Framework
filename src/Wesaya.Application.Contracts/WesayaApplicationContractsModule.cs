@@ -21,7 +21,7 @@ namespace Wesaya;
     typeof(AbpFluentValidationModule),
     typeof(AbpObjectExtendingModule)
 )]
-public class WesayaApplicationContractsModule : AbpModule
+public sealed class WesayaApplicationContractsModule : AbpModule
 {
     public override void PreConfigureServices(ServiceConfigurationContext context)
     {

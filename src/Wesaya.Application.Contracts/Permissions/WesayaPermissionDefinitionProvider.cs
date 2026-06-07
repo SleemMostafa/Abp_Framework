@@ -4,7 +4,7 @@ using Volo.Abp.Localization;
 
 namespace Wesaya.Permissions;
 
-public class WesayaPermissionDefinitionProvider : PermissionDefinitionProvider
+public sealed class WesayaPermissionDefinitionProvider : PermissionDefinitionProvider
 {
     public override void Define(IPermissionDefinitionContext context)
     {

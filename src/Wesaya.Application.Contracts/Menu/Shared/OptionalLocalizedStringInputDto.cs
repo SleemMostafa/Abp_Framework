@@ -1,8 +1,8 @@
 namespace Wesaya.Menu.Shared;
 
-public class OptionalLocalizedStringInputDto
+public sealed class OptionalLocalizedStringInputDto
 {
-    public string? English { get; set; }
+    public string? English { get; init; }
 
-    public string? Arabic { get; set; }
+    public string? Arabic { get; init; }
 }

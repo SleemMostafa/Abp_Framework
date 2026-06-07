@@ -4,19 +4,19 @@ using Volo.Abp.Application.Dtos;
 
 namespace Wesaya.Menu.Items;
 
-public class MenuItemDto : AuditedEntityDto<Guid>
+public sealed class MenuItemDto : AuditedEntityDto<Guid>
 {
-    public Guid CategoryId { get; set; }
+    public Guid CategoryId { get; init; }
 
-    public string Name { get; set; } = string.Empty;
+    public string Name { get; init; } = string.Empty;
 
-    public string? Description { get; set; }
+    public string? Description { get; init; }
 
-    public decimal Price { get; set; }
+    public decimal Price { get; init; }
 
-    public bool IsAvailable { get; set; }
+    public bool IsAvailable { get; init; }
 
-    public int PreparationTimeMinutes { get; set; }
+    public int PreparationTimeMinutes { get; init; }
 
-    public List<ExtraItemDto> ExtraItems { get; set; } = [];
+    public List<ExtraItemDto> ExtraItems { get; init; } = [];
 }

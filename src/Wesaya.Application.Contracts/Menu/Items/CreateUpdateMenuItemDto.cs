@@ -4,19 +4,19 @@ using Wesaya.Menu.Shared;
 
 namespace Wesaya.Menu.Items;
 
-public class CreateUpdateMenuItemDto
+public sealed class CreateUpdateMenuItemDto
 {
-    public Guid CategoryId { get; set; }
+    public Guid CategoryId { get; init; }
 
-    public StrongLocalizedStringInputDto Name { get; set; } = new();
+    public StrongLocalizedStringInputDto Name { get; init; } = new();
 
-    public OptionalLocalizedStringInputDto? Description { get; set; }
+    public OptionalLocalizedStringInputDto? Description { get; init; }
 
-    public decimal Price { get; set; }
+    public decimal Price { get; init; }
 
-    public bool IsAvailable { get; set; } = true;
+    public bool IsAvailable { get; init; } = true;
 
-    public int PreparationTimeMinutes { get; set; }
+    public int PreparationTimeMinutes { get; init; }
 
-    public List<CreateUpdateExtraItemDto> ExtraItems { get; set; } = [];
+    public List<CreateUpdateExtraItemDto> ExtraItems { get; init; } = [];
 }
